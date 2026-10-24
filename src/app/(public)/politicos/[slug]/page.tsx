@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { CommentSection } from "@/components/comments/comment-section";
 import { ProfileView } from "@/components/profile/profile-view";
 import { PageViewBeacon } from "@/components/popularity/page-view-beacon";
 import { PartyBadge } from "@/components/public/party-badge";
@@ -92,6 +93,15 @@ async function Profile({ params }: Pick<PageProps<"/politicos/[slug]">, "params"
       <ProfileView
         payload={payload}
         archiveUrls={profile.archiveUrls}
+        sectionAside={(section) => (
+          <Link
+            href={`${reportHref}&seccion=${section}`}
+            prefetch={false}
+            className="text-xs text-muted underline-offset-4 hover:text-foreground hover:underline"
+          >
+            Reportar un error<span className="sr-only"> en esta sección</span>
+          </Link>
+        )}
         headerAside={
           <div className="mt-3 space-y-2">
             {payload.politician.deathDate && (
@@ -174,6 +184,8 @@ async function Profile({ params }: Pick<PageProps<"/politicos/[slug]">, "params"
           .
         </p>
       </section>
+
+      <CommentSection slug={slug} />
     </>
   );
 }

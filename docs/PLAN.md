@@ -1,6 +1,6 @@
 # DR Politicians — Project Plan
 
-Status: **approved; Phases 0–4 and 6 built, Phase 3 pilot awaiting review (2026-10-24)** · Written 2026-10-24 · Owner: project admin
+Status: **approved; Phases 0–6 built, Phase 3 pilot awaiting review (2026-10-24)** · Written 2026-10-24 · Owner: project admin
 
 A public, source-backed collection of profiles of all living current and former politicians of
 the Dominican Republic, researched in chunks with Claude Code and published only

@@ -32,11 +32,19 @@ export function Field({
   );
 }
 
-export function SubmitButton({ pending, children }: { pending: boolean; children: ReactNode }) {
+export function SubmitButton({
+  pending,
+  disabled,
+  children,
+}: {
+  pending: boolean;
+  disabled?: boolean;
+  children: ReactNode;
+}) {
   return (
     <button
       type="submit"
-      disabled={pending}
+      disabled={pending || disabled}
       className="rounded-md bg-accent px-4 py-2 font-medium text-accent-foreground disabled:opacity-60"
     >
       {pending ? "Un momento…" : children}

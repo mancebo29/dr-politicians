@@ -1,15 +1,20 @@
 import type {
   allianceKind,
+  commentStatus,
+  feedbackKind,
+  feedbackStatus,
   legalStatus,
   legislationInvolvement,
   legislationKind,
   legislationStatus,
   membershipRole,
   positionOrigin,
+  reportResolution,
   researchJobKind,
   researchJobStatus,
   sourceTier,
   statementKind,
+  UserRole,
 } from "@/db/schema";
 import type { RoleGroup } from "@/lib/public/filters";
 
@@ -117,4 +122,37 @@ export const roleGroupLabel: Record<RoleGroup, string> = {
   parlacen: "Parlacen",
   partido: "Dirección de partido",
   exfuncionario: "Ex-funcionario",
+};
+
+export const feedbackKindLabel: Labels<typeof feedbackKind> = {
+  correction: "Corrección de un perfil",
+  bug: "Error del sitio",
+  suggestion: "Sugerencia",
+  other: "Otro",
+};
+
+export const feedbackStatusLabel: Labels<typeof feedbackStatus> = {
+  new: "Nuevo",
+  triaged: "En curso",
+  resolved: "Resuelto",
+  dismissed: "Descartado",
+};
+
+export const commentStatusLabel: Labels<typeof commentStatus> = {
+  visible: "Visible",
+  pending: "Pendiente",
+  hidden: "Oculto",
+  deleted: "Eliminado",
+};
+
+export const roleLabel: Record<UserRole, string> = {
+  user: "Usuario",
+  moderator: "Moderación",
+  admin: "Administración",
+};
+
+export const reportResolutionLabel: Labels<typeof reportResolution> = {
+  dismissed: "descartado",
+  hidden: "comentario oculto",
+  deleted: "comentario eliminado",
 };

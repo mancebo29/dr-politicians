@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { and, desc, eq, gt, ilike, inArray, lt, or, sql } from "drizzle-orm";
-import type { Database } from "@/db/client";
+import type { Database, Transaction } from "@/db/client";
 import {
   auditLog,
   parties,
@@ -32,8 +32,10 @@ export class QueueError extends Error {
 
 type JobKind = (typeof researchJobs.$inferInsert)["kind"];
 
+// Accepts a transaction so callers (e.g. feedback triage) can queue a job
+// atomically with their own changes.
 export async function createJob(
-  db: Database,
+  db: Database | Transaction,
   input: {
     kind: JobKind;
     politicianId?: string | null;

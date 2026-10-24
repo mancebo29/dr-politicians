@@ -29,6 +29,13 @@
       "when": 1792874070299,
       "tag": "0003_free_alex_wilder",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792883212314,
+      "tag": "0004_community_and_rate_limits",
+      "breakpoints": true
     }
   ]
 }

@@ -13,6 +13,9 @@ const messages: Record<string, string> = {
   PASSWORD_TOO_LONG: "La contraseña es demasiado larga.",
   INVALID_TOKEN: "El enlace no es válido o ya venció. Solicita uno nuevo.",
   BANNED_USER: "Esta cuenta está suspendida.",
+  REGISTRATION_CLOSED: "El registro de cuentas nuevas está cerrado en este momento.",
+  MISSING_RESPONSE: "Completa la verificación de seguridad.",
+  VERIFICATION_FAILED: "No pudimos completar la verificación de seguridad. Inténtalo de nuevo.",
 };
 
 export function authErrorMessage(error: { code?: string; status?: number } | null | undefined) {
