@@ -11,6 +11,7 @@ import type {
   sourceTier,
   statementKind,
 } from "@/db/schema";
+import type { RoleGroup } from "@/lib/public/filters";
 
 type Values<E extends { enumValues: readonly string[] }> = E["enumValues"][number];
 type Labels<E extends { enumValues: readonly string[] }> = Record<Values<E>, string>;
@@ -105,4 +106,15 @@ export const jobStatusLabel: Labels<typeof researchJobStatus> = {
   needs_changes: "Cambios solicitados",
   failed: "Fallido",
   cancelled: "Cancelado",
+};
+
+// Public list filter "cargo actual" (PLAN §7.2).
+export const roleGroupLabel: Record<RoleGroup, string> = {
+  ejecutivo: "Ejecutivo",
+  senado: "Senado",
+  camara: "Cámara de Diputados",
+  alcaldia: "Alcaldía",
+  parlacen: "Parlacen",
+  partido: "Dirección de partido",
+  exfuncionario: "Ex-funcionario",
 };

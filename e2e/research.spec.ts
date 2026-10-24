@@ -45,6 +45,14 @@ test("queue, claim, submit, review and publish a research job", async ({ page })
   const submitted = await api("submit", { jobId: brief.job.id, payload });
   expect(submitted.status()).toBe(200);
 
+  // Not public until approved; visiting first also fills the public caches
+  // that publishing has to invalidate.
+  const publicPath = `/politicos/${name.toLowerCase().replace(/ /g, "-")}`;
+  await page.goto(publicPath);
+  await expect(page.getByRole("heading", { name: "Página no encontrada" })).toBeVisible();
+  await page.goto(`/?q=${encodeURIComponent(name)}`);
+  await expect(page.getByText("No encontramos políticos con esos criterios.")).toBeVisible();
+
   await page.goto(`/admin/investigacion/${brief.job.id}`);
   await expect(page.getByText("Pendiente de revisión")).toBeVisible();
   await expect(page.getByText("+ Senador — Senado de la República, Santiago")).toBeVisible();
@@ -59,4 +67,9 @@ test("queue, claim, submit, review and publish a research job", async ({ page })
     "href",
     "https://example.org/a",
   );
+
+  await page.goto(publicPath);
+  await expect(page.getByRole("heading", { level: 1, name })).toBeVisible();
+  await page.goto(`/?q=${encodeURIComponent(name)}`);
+  await expect(page.getByRole("link", { name })).toBeVisible();
 });

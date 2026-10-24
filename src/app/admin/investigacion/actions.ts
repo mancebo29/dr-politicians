@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { db } from "@/db";
 import { auditLog, researchJobs } from "@/db/schema";
+import { invalidatePublicProfile } from "@/lib/public/invalidate";
 import { PublishError, publishSections, publishSubmission } from "@/lib/research/publish";
 import {
   createJob,
@@ -77,6 +78,7 @@ export async function publishAction(
   } catch (error) {
     return failure(error);
   }
+  invalidatePublicProfile(slug);
   revalidatePath("/admin", "layout");
   redirect(`/admin/perfiles/${slug}`);
 }

@@ -1,15 +1,32 @@
-export default function Home() {
+import type { Metadata } from "next";
+import Link from "next/link";
+import { PoliticianDirectory } from "@/components/public/politician-directory";
+
+export const metadata: Metadata = {
+  title: { absolute: "Políticos RD · Perfiles con fuentes de políticos dominicanos" },
+  alternates: { canonical: "/" },
+};
+
+export default function Home({ searchParams }: PageProps<"/">) {
   return (
-    <section className="mx-auto w-full max-w-3xl px-4 py-16">
-      <h1 className="text-3xl font-semibold tracking-tight">Políticos RD</h1>
-      <p className="mt-4 text-lg text-muted">
-        Perfiles con fuentes de los políticos de la República Dominicana: trayectoria, leyes,
-        partidos, declaraciones y controversias.
+    <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:py-10">
+      <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+        Políticos de la República Dominicana
+      </h1>
+      <p className="mt-2 max-w-3xl text-muted">
+        Trayectoria, leyes, partidos, declaraciones y controversias de cada político, con la fuente
+        de cada dato. Los perfiles se investigan con ayuda de IA y una persona los revisa antes de
+        publicarlos.{" "}
+        <Link
+          href="/metodologia"
+          className="text-accent underline underline-offset-4 hover:decoration-2"
+        >
+          Cómo trabajamos
+        </Link>
       </p>
-      <p className="mt-8 rounded-lg border border-border bg-surface p-4 text-sm text-muted">
-        Estamos preparando los primeros perfiles. Cada dato se publicará con su fuente y después de
-        una revisión humana.
-      </p>
-    </section>
+      <div className="mt-6">
+        <PoliticianDirectory path="/" searchParams={searchParams} />
+      </div>
+    </div>
   );
 }

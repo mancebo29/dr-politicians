@@ -19,6 +19,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx --env-file-if-exists=.env.local scripts/db-migrate.ts",
     "db:seed": "tsx --env-file-if-exists=.env.local scripts/db-seed.ts",
+    "db:seed:samples": "tsx --env-file-if-exists=.env.local scripts/seed-sample-profiles.ts",
     "db:studio": "drizzle-kit studio",
     "admin:promote": "tsx --env-file-if-exists=.env.local scripts/admin-promote.ts",
     "research:claim": "tsx --env-file-if-exists=.env.local scripts/research.ts claim",

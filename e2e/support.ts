@@ -1,7 +1,9 @@
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { expect, type Page } from "@playwright/test";
-import { createDb } from "@/db/client";
+import { createDb, type Database } from "@/db/client";
+import { politicians, popularitySnapshots } from "@/db/schema";
+import { publishSampleProfiles } from "@/lib/public/sample-profiles";
 
 export const MAIL_OUTBOX_DIR = ".tmp/e2e-mail";
 
@@ -16,6 +18,34 @@ export function e2eDatabaseUrl(): string {
 
 export function e2eDb() {
   return createDb(e2eDatabaseUrl(), { max: 1 });
+}
+
+// Public pages cache their reads, so everything the public specs look at is
+// created before the server answers its first request. Profiles go through
+// the real publish path; the draft and the ranking rows stand in for states
+// that other features (admin edits, the weekly ranking job) produce.
+export async function seedPublicSiteData(db: Database) {
+  await publishSampleProfiles(db, { fillers: 16 });
+  await db
+    .insert(politicians)
+    .values({ slug: "borrador-oculto", fullName: "José Borrador Oculto", status: "draft" });
+  const ids = Object.fromEntries(
+    (await db.select({ slug: politicians.slug, id: politicians.id }).from(politicians)).map((p) => [
+      p.slug,
+      p.id,
+    ]),
+  );
+  await db.insert(popularitySnapshots).values([
+    {
+      weekStart: "2026-10-19",
+      politicianId: ids["carlos-ficticio"],
+      score: 9,
+      rank: 1,
+      rankDelta: 2,
+    },
+    { weekStart: "2026-10-19", politicianId: ids["maria-nunez"], score: 5, rank: 2 },
+    { weekStart: "2026-10-19", politicianId: ids["jose-pena"], score: 3, rank: 3, rankDelta: -2 },
+  ]);
 }
 
 export function uniqueUser(prefix = "u") {

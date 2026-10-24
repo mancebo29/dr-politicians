@@ -19,9 +19,16 @@ export function SiteHeader() {
   return (
     <header className="border-b border-border">
       <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-4 py-3">
-        <Link href="/" className="font-semibold tracking-tight">
-          Políticos RD
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link href="/" className="font-semibold tracking-tight">
+            Políticos RD
+          </Link>
+          <nav aria-label="Principal" className="text-sm">
+            <Link href="/metodologia" className="text-muted hover:text-foreground hover:underline">
+              Metodología
+            </Link>
+          </nav>
+        </div>
         <nav aria-label="Cuenta" className="flex items-center gap-4 text-sm">
           {isPending ? null : session ? (
             <>

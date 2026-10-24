@@ -76,7 +76,8 @@ export type PublishInput = {
 
 // Applies an approved research submission to the live profile in one
 // transaction: either the whole publish lands, with its revision and audit
-// entries, or nothing changes.
+// entries, or nothing changes. Server Action callers must then invalidate the
+// public caches with invalidatePublicProfile(slug) (src/lib/public/invalidate.ts).
 export async function publishSubmission(db: Database, input: PublishInput) {
   const note = input.note?.trim() || null;
   const include = new Set(input.sections);

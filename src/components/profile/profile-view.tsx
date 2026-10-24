@@ -39,9 +39,15 @@ function Empty() {
 export function ProfileView({
   payload,
   idPrefix = "",
+  archiveUrls = {},
+  headerAside,
 }: {
   payload: ResearchPayload;
   idPrefix?: string;
+  // Archived copy of a source, keyed by source URL.
+  archiveUrls?: Record<string, string>;
+  // Extra header content, e.g. party and current role on the public page.
+  headerAside?: ReactNode;
 }) {
   const numbers = new Map(payload.sources.map((s, i) => [s.id, i + 1]));
   const cite: Cite = (ids) => (
@@ -50,9 +56,9 @@ export function ProfileView({
         <a
           key={id}
           href={`#${idPrefix}fuente-${numbers.get(id)}`}
-          className="text-accent hover:underline"
+          className="text-accent hover:underline focus-visible:outline-2 focus-visible:outline-accent"
         >
-          [{numbers.get(id)}]
+          <span className="sr-only">fuente </span>[{numbers.get(id)}]
         </a>
       ))}
     </sup>
@@ -61,17 +67,21 @@ export function ProfileView({
 
   return (
     <article>
-      <header className="flex gap-6">
+      <header className="flex flex-col gap-4 sm:flex-row sm:gap-6">
         {payload.photo && (
-          // eslint-disable-next-line @next/next/no-img-element -- remote, license-tracked photos; next/image domains are configured in Phase 4
+          // eslint-disable-next-line @next/next/no-img-element -- license-tracked photos come from varied remote hosts (e.g. Wikimedia), so next/image remotePatterns would have to allow any host
           <img
             src={payload.photo.url}
             alt={p.fullName}
-            className="h-32 w-28 rounded-md border border-border object-cover"
+            width={112}
+            height={128}
+            className="h-32 w-28 shrink-0 rounded-md border border-border object-cover"
           />
         )}
-        <div>
-          <h1 className="text-3xl font-semibold tracking-tight">{p.knownAs ?? p.fullName}</h1>
+        <div className="min-w-0">
+          <h1 className="text-2xl font-semibold tracking-tight break-words sm:text-3xl">
+            {p.knownAs ?? p.fullName}
+          </h1>
           {p.knownAs && <p className="mt-1 text-muted">{p.fullName}</p>}
           <p className="mt-2 text-sm text-muted">
             {[
@@ -82,6 +92,7 @@ export function ProfileView({
               .filter(Boolean)
               .join(" · ")}
           </p>
+          {headerAside}
         </div>
       </header>
 
@@ -221,13 +232,17 @@ export function ProfileView({
       <Section title="Fuentes">
         <ol className="space-y-2 text-sm">
           {payload.sources.map((s, i) => (
-            <li key={s.id} id={`${idPrefix}fuente-${i + 1}`} className="scroll-mt-20">
+            <li
+              key={s.id}
+              id={`${idPrefix}fuente-${i + 1}`}
+              className="scroll-mt-20 break-words target:rounded target:bg-surface"
+            >
               <span className="mr-1 text-muted tabular-nums">[{i + 1}]</span>
               <a
                 href={s.url}
                 target="_blank"
                 rel="noopener noreferrer nofollow"
-                className="text-accent hover:underline"
+                className="text-accent underline underline-offset-2 hover:decoration-2"
               >
                 {s.title}
               </a>
@@ -237,6 +252,19 @@ export function ProfileView({
                 {s.publishedOn && ` · ${formatPartialDate(s.publishedOn)}`} ·{" "}
                 {sourceTierLabel[s.tier]} · consultado {formatPartialDate(s.accessedOn)}
               </span>
+              {archiveUrls[s.url] && (
+                <>
+                  {" · "}
+                  <a
+                    href={archiveUrls[s.url]}
+                    target="_blank"
+                    rel="noopener noreferrer nofollow"
+                    className="text-accent underline underline-offset-2 hover:decoration-2"
+                  >
+                    copia archivada<span className="sr-only"> de {s.title}</span>
+                  </a>
+                </>
+              )}
               {s.excerpt && <p className="mt-0.5 text-muted italic">“{s.excerpt}”</p>}
             </li>
           ))}
