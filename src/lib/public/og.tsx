@@ -24,7 +24,7 @@ export function ogCard({
         padding: "72px 80px",
         background: "#ffffff",
         color: "#171717",
-        borderTop: "16px solid #1d4ed8",
+        borderTop: "16px solid #ce1126",
       }}
     >
       <div style={{ display: "flex", flexDirection: "column" }}>
@@ -46,7 +46,7 @@ export function ogCard({
         ))}
       </div>
       <div style={{ display: "flex", justifyContent: "space-between", fontSize: 30 }}>
-        <div style={{ color: "#1d4ed8" }}>{SITE_NAME}</div>
+        <div style={{ color: "#002d62" }}>{SITE_NAME}</div>
         <div style={{ color: "#5f6368" }}>Perfiles con fuentes</div>
       </div>
     </div>,

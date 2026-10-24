@@ -111,12 +111,9 @@ async function Directory({
           )}
         </div>
       ) : (
-        <ol
-          className="mt-4 divide-y divide-border border-y border-border"
-          data-testid="politician-list"
-        >
+        <ol className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3" data-testid="politician-list">
           {list.items.map((item) => (
-            <PoliticianRow
+            <PoliticianCard
               key={item.slug}
               item={item}
               showRank={filters.sort === "rank" && list.rankingWeek !== null}
@@ -166,76 +163,101 @@ function initials(name: string) {
     .toUpperCase();
 }
 
-function PoliticianRow({ item, showRank }: { item: PoliticianListItem; showRank: boolean }) {
+// The name link stretches over the whole card; the party badge sits above it
+// so it stays its own link.
+function PoliticianCard({ item, showRank }: { item: PoliticianListItem; showRank: boolean }) {
+  const role = item.role
+    ? [item.role.isCurrent ? item.role.title : `Antes: ${item.role.title}`, item.role.province]
+        .filter(Boolean)
+        .join(" · ")
+    : "Sin cargos registrados";
   return (
-    <li className="flex items-center gap-3 py-3 sm:gap-4">
-      {showRank && (
-        <div className="flex w-10 shrink-0 flex-col items-center text-center">
-          {item.rank !== null ? (
-            <>
-              <span className="text-lg font-semibold tabular-nums">
-                <span className="sr-only">Puesto </span>
-                {item.rank}
-              </span>
-              <RankChange delta={item.rankDelta} />
-              {item.noRecentData && (
-                <span className="mt-0.5 text-[0.625rem] leading-tight text-muted">
-                  sin datos recientes
-                </span>
-              )}
-            </>
+    <li className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-background shadow-sm transition hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-md has-[h2_a:focus-visible]:outline-2 has-[h2_a:focus-visible]:outline-offset-2 has-[h2_a:focus-visible]:outline-accent motion-reduce:transition-none motion-reduce:hover:translate-y-0">
+      <div
+        className="h-1 bg-brand-blue"
+        style={{ backgroundColor: item.party?.color ?? undefined }}
+      />
+      <div className="flex flex-1 flex-col p-4">
+        <div className="flex items-start gap-3">
+          {item.photoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element -- remote, license-tracked photos from varied hosts
+            <img
+              src={item.photoUrl}
+              alt=""
+              width={56}
+              height={56}
+              loading="lazy"
+              className="size-14 shrink-0 rounded-full border border-border object-cover"
+            />
           ) : (
-            <span className="text-muted" aria-label="Sin puesto esta semana">
-              —
+            <span
+              aria-hidden
+              className="flex size-14 shrink-0 items-center justify-center rounded-full bg-surface-tint text-base font-semibold text-accent"
+            >
+              {initials(item.name)}
             </span>
           )}
+          <div className="min-w-0 flex-1">
+            <h2 className="leading-snug font-semibold break-words">
+              <Link
+                href={`/politicos/${item.slug}`}
+                className="group-hover:text-accent after:absolute after:inset-0 after:content-[''] focus-visible:outline-none"
+              >
+                {item.name}
+              </Link>
+            </h2>
+            <p className="mt-0.5 text-sm break-words text-muted">{role}</p>
+          </div>
+          {showRank && <RankBadge item={item} />}
         </div>
-      )}
-      {item.photoUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element -- remote, license-tracked photos from varied hosts
-        <img
-          src={item.photoUrl}
-          alt=""
-          width={48}
-          height={48}
-          loading="lazy"
-          className="size-12 shrink-0 rounded-full border border-border object-cover"
-        />
-      ) : (
-        <span
-          aria-hidden
-          className="flex size-12 shrink-0 items-center justify-center rounded-full bg-surface text-sm font-semibold text-muted"
-        >
-          {initials(item.name)}
-        </span>
-      )}
-      <div className="min-w-0 flex-1">
-        <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <Link
-            href={`/politicos/${item.slug}`}
-            className="font-semibold break-words underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-          >
-            {item.name}
-          </Link>
-          {item.party && <PartyBadge party={item.party} />}
-          {item.deceased && (
-            <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted">
-              Fallecido
-            </span>
-          )}
-        </p>
-        <p className="mt-0.5 text-sm break-words text-muted">
-          {item.role
-            ? [
-                item.role.isCurrent ? item.role.title : `Antes: ${item.role.title}`,
-                item.role.province,
-              ]
-                .filter(Boolean)
-                .join(" · ")
-            : "Sin cargos registrados"}
-        </p>
+        {item.summary && (
+          <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-foreground/80">
+            {item.summary}
+          </p>
+        )}
+        {(item.party || item.deceased) && (
+          <p className="mt-auto flex flex-wrap items-center gap-2 pt-3">
+            {item.party && (
+              <span className="relative z-10">
+                <PartyBadge party={item.party} />
+              </span>
+            )}
+            {item.deceased && (
+              <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted">
+                Fallecido
+              </span>
+            )}
+          </p>
+        )}
       </div>
     </li>
+  );
+}
+
+function RankBadge({ item }: { item: PoliticianListItem }) {
+  if (item.rank === null) {
+    return (
+      <span className="shrink-0 text-sm text-muted" aria-label="Sin puesto esta semana">
+        —
+      </span>
+    );
+  }
+  return (
+    <div className="flex shrink-0 flex-col items-end text-right">
+      <span className="rounded-md bg-surface-tint px-2 py-0.5 text-sm font-semibold text-accent tabular-nums">
+        <span className="sr-only">Puesto </span>
+        <span aria-hidden>#</span>
+        {item.rank}
+      </span>
+      <span className="mt-1">
+        <RankChange delta={item.rankDelta} />
+      </span>
+      {item.noRecentData && (
+        <span className="mt-0.5 max-w-16 text-[0.625rem] leading-tight text-muted">
+          sin datos recientes
+        </span>
+      )}
+    </div>
   );
 }
 
@@ -244,12 +266,9 @@ function DirectorySkeleton() {
     <div aria-hidden>
       <div className="h-[13.5rem] rounded-lg border border-border bg-surface sm:h-40 lg:h-[10.5rem]" />
       <div className="mt-6 h-5 w-40 rounded bg-surface" />
-      <ul className="mt-4 divide-y divide-border border-y border-border">
+      <ul className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 6 }, (_, i) => (
-          <li key={i} className="flex items-center gap-4 py-3">
-            <span className="size-12 rounded-full bg-surface" />
-            <span className="h-4 w-48 rounded bg-surface" />
-          </li>
+          <li key={i} className="h-44 rounded-xl border border-border bg-surface" />
         ))}
       </ul>
     </div>

@@ -128,6 +128,17 @@ describe("listPublishedPoliticians", () => {
       province: "Santiago",
     });
     expect(bySlug["Luis Demo"].role?.province).toBe("La Vega");
+    expect(bySlug["Luis Demo"].summary).toBe("Perfil ficticio de ejemplo. Alcalde de Jarabacoa.");
+  });
+
+  it("previews only the start of a long summary", async () => {
+    const { id } = await slugOf("Pedro Ejemplo Muestra");
+    await db
+      .update(politicians)
+      .set({ summary: "a".repeat(1000) })
+      .where(eq(politicians.id, id));
+    const { items } = await listPublishedPoliticians(db, { ...defaultFilters, q: "pedro" });
+    expect(items[0].summary).toHaveLength(300);
   });
 
   it("paginates and clamps out-of-range pages", async () => {

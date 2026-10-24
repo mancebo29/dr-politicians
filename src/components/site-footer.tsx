@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export function SiteFooter() {
   return (
-    <footer className="mt-16 border-t border-border">
+    <footer className="mt-16 border-t border-border bg-surface">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-3 px-4 py-6 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
         <p>
           Perfiles investigados con ayuda de IA y revisados por personas. Cada dato enlaza a su

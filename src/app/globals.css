@@ -1,25 +1,36 @@
 @import "tailwindcss";
 
+/* Identity: a white site with the Dominican flag's blue and red. Blue is the
+   primary (links, focus, header); red is a sparing highlight (eyebrows, the
+   main call to action). The brand pair stays fixed across color schemes. */
 :root {
+  --brand-blue: #002d62;
+  --brand-red: #ce1126;
   --background: #ffffff;
-  --foreground: #171717;
-  --muted: #5f6368;
-  --surface: #f6f7f9;
-  --border: #d9dce1;
-  --accent: #1d4ed8;
+  --foreground: #0d1b2e;
+  --muted: #566074;
+  --surface: #f3f6fa;
+  --surface-tint: #e8eef7;
+  --border: #dbe1ea;
+  --accent: #0a3d82;
   --accent-foreground: #ffffff;
+  --highlight: #ce1126;
   --danger: #b42318;
   --success: #067647;
 }
 
 @theme inline {
+  --color-brand-blue: var(--brand-blue);
+  --color-brand-red: var(--brand-red);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
   --color-surface: var(--surface);
+  --color-surface-tint: var(--surface-tint);
   --color-border: var(--border);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-highlight: var(--highlight);
   --color-danger: var(--danger);
   --color-success: var(--success);
   --font-sans: var(--font-geist-sans);
@@ -28,13 +39,15 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0b0c0e;
-    --foreground: #ededed;
-    --muted: #a0a4ab;
-    --surface: #16181c;
-    --border: #2c3036;
-    --accent: #6d9eff;
-    --accent-foreground: #0b0c0e;
+    --background: #0a1222;
+    --foreground: #e8edf5;
+    --muted: #9aa6ba;
+    --surface: #111c30;
+    --surface-tint: #15233d;
+    --border: #26344f;
+    --accent: #8db4ff;
+    --accent-foreground: #0a1222;
+    --highlight: #ff6b78;
     --danger: #f97066;
     --success: #47cd89;
   }

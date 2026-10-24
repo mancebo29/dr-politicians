@@ -43,7 +43,7 @@ async function PartyContent({ params, searchParams }: PageProps<"/partidos/[slug
           ← Todos los políticos
         </Link>
       </nav>
-      <p className="text-sm font-medium text-muted">Partido</p>
+      <p className="text-sm font-semibold tracking-wide text-highlight uppercase">Partido</p>
       <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
         {party.name} ({party.acronym})
       </h1>

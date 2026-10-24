@@ -43,7 +43,7 @@ async function ProvinceContent({ params, searchParams }: PageProps<"/provincias/
           ← Todos los políticos
         </Link>
       </nav>
-      <p className="text-sm font-medium text-muted">
+      <p className="text-sm font-semibold tracking-wide text-highlight uppercase">
         Provincia{province.region && ` · región ${province.region}`}
       </p>
       <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{province.name}</h1>

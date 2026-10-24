@@ -8,6 +8,8 @@ import { loadProfile, type LoadedProfile } from "@/lib/profiles/load";
 import type { ListFilters, RoleGroup } from "./filters";
 
 export const PAGE_SIZE = 20;
+// Longer than a three-line card clamp ever shows.
+const SUMMARY_PREVIEW_LENGTH = 300;
 
 export type PartyRef = { slug: string; acronym: string; name: string; color: string | null };
 
@@ -16,6 +18,8 @@ export type PoliticianListItem = {
   name: string;
   fullName: string;
   photoUrl: string | null;
+  // The start of the profile summary, enough for a card preview.
+  summary: string | null;
   deceased: boolean;
   party: PartyRef | null;
   // The current position, or the most recent one for former office-holders.
@@ -100,6 +104,7 @@ type ListRow = {
   full_name: string;
   known_as: string | null;
   photo_url: string | null;
+  summary: string | null;
   deceased: boolean;
   party_slug: string | null;
   party_acronym: string | null;
@@ -143,6 +148,7 @@ export async function listPublishedPoliticians(
       ${politicians.fullName} as full_name,
       ${politicians.knownAs} as known_as,
       ${politicians.photoUrl} as photo_url,
+      nullif(left(${politicians.summary}, ${SUMMARY_PREVIEW_LENGTH}), '') as summary,
       ${politicians.deathDate} is not null as deceased,
       ${parties.slug} as party_slug,
       ${parties.acronym} as party_acronym,
@@ -179,6 +185,7 @@ export async function listPublishedPoliticians(
       name: r.known_as ?? r.full_name,
       fullName: r.full_name,
       photoUrl: r.photo_url,
+      summary: r.summary,
       deceased: r.deceased,
       party:
         r.party_slug && r.party_acronym && r.party_name

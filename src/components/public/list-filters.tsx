@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { type FormEvent, useTransition } from "react";
 import { roleGroupLabel } from "@/lib/labels";
 import {
+  defaultFilters,
   type ListFilters,
   listHref,
   type ListSort,
@@ -70,6 +71,12 @@ export function ListFiltersForm({
       ? [...options.provinces, { slug: filters.province, name: filters.province }]
       : options.provinces;
 
+  const activeCount = [
+    !fixed.party && filters.party,
+    filters.role,
+    !fixed.province && filters.province,
+  ].filter(Boolean).length;
+
   return (
     <form
       role="search"
@@ -77,60 +84,95 @@ export function ListFiltersForm({
       action={path}
       method="get"
       onSubmit={onSubmit}
-      className="grid gap-3 rounded-lg border border-border bg-surface p-4 sm:grid-cols-2 lg:grid-cols-4"
+      className="rounded-xl border border-border bg-surface p-4"
     >
-      <div className="sm:col-span-2 lg:col-span-4">
-        <label htmlFor="filtro-q" className="mb-1 block text-sm font-medium">
-          Buscar por nombre
-        </label>
+      <label htmlFor="filtro-q" className="mb-1 block text-sm font-medium">
+        Buscar por nombre
+      </label>
+      <input
+        id="filtro-q"
+        name="q"
+        type="search"
+        defaultValue={filters.q}
+        placeholder="Ej.: José Peña"
+        autoComplete="off"
+        maxLength={100}
+        className={fieldClass}
+      />
+      {/* A CSS-only disclosure so the filters stay reachable without
+          JavaScript; it only applies below the sm breakpoint. The checkbox
+          has no name, so it is never submitted. */}
+      <div className="mt-3">
         <input
-          id="filtro-q"
-          name="q"
-          type="search"
-          defaultValue={filters.q}
-          placeholder="Ej.: José Peña"
-          autoComplete="off"
-          maxLength={100}
-          className={fieldClass}
+          id="filtros-mostrar"
+          type="checkbox"
+          defaultChecked={activeCount > 0 || filters.sort !== defaultFilters.sort}
+          className="peer sr-only sm:hidden"
         />
+        <label
+          htmlFor="filtros-mostrar"
+          className="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-border bg-background px-3 py-1.5 text-sm font-medium peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent sm:hidden peer-checked:[&>svg]:rotate-180"
+        >
+          Filtros y orden
+          {activeCount > 0 && (
+            <span className="rounded-full bg-accent px-1.5 text-xs leading-5 text-accent-foreground">
+              {activeCount}
+              <span className="sr-only">{activeCount === 1 ? " activo" : " activos"}</span>
+            </span>
+          )}
+          <svg
+            aria-hidden
+            viewBox="0 0 16 16"
+            className="size-4 transition-transform motion-reduce:transition-none"
+          >
+            <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.5" />
+          </svg>
+        </label>
+        <div className="mt-3 hidden gap-3 peer-checked:grid sm:mt-0 sm:grid sm:grid-cols-2 lg:grid-cols-4">
+          {!fixed.party && (
+            <Select id="filtro-partido" name="partido" label="Partido" value={filters.party}>
+              <option value="">Todos los partidos</option>
+              {parties.map((p) => (
+                <option key={p.slug} value={p.slug}>
+                  {p.acronym === p.name ? p.name : `${p.acronym} · ${p.name}`}
+                </option>
+              ))}
+            </Select>
+          )}
+          <Select id="filtro-cargo" name="cargo" label="Cargo actual" value={filters.role}>
+            <option value="">Todos los cargos</option>
+            {roleGroups.map((g) => (
+              <option key={g} value={g}>
+                {roleGroupLabel[g]}
+              </option>
+            ))}
+          </Select>
+          {!fixed.province && (
+            <Select
+              id="filtro-provincia"
+              name="provincia"
+              label="Provincia"
+              value={filters.province}
+            >
+              <option value="">Todas las provincias</option>
+              {provinces.map((p) => (
+                <option key={p.slug} value={p.slug}>
+                  {p.name}
+                </option>
+              ))}
+            </Select>
+          )}
+          <Select id="filtro-orden" name="orden" label="Ordenar por" value={filters.sort}>
+            <option value="rank">Relevancia en noticias</option>
+            <option value="name">Nombre (A–Z)</option>
+          </Select>
+        </div>
       </div>
-      {!fixed.party && (
-        <Select id="filtro-partido" name="partido" label="Partido" value={filters.party}>
-          <option value="">Todos los partidos</option>
-          {parties.map((p) => (
-            <option key={p.slug} value={p.slug}>
-              {p.acronym === p.name ? p.name : `${p.acronym} · ${p.name}`}
-            </option>
-          ))}
-        </Select>
-      )}
-      <Select id="filtro-cargo" name="cargo" label="Cargo actual" value={filters.role}>
-        <option value="">Todos los cargos</option>
-        {roleGroups.map((g) => (
-          <option key={g} value={g}>
-            {roleGroupLabel[g]}
-          </option>
-        ))}
-      </Select>
-      {!fixed.province && (
-        <Select id="filtro-provincia" name="provincia" label="Provincia" value={filters.province}>
-          <option value="">Todas las provincias</option>
-          {provinces.map((p) => (
-            <option key={p.slug} value={p.slug}>
-              {p.name}
-            </option>
-          ))}
-        </Select>
-      )}
-      <Select id="filtro-orden" name="orden" label="Ordenar por" value={filters.sort}>
-        <option value="rank">Relevancia en noticias</option>
-        <option value="name">Nombre (A–Z)</option>
-      </Select>
-      <div className="flex items-center gap-3 sm:col-span-2 lg:col-span-4">
+      <div className="mt-3 flex items-center gap-3">
         <button
           type="submit"
           disabled={pending}
-          className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-accent-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-60"
+          className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-accent-foreground hover:bg-accent/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-60"
         >
           {pending ? "Buscando…" : "Buscar"}
         </button>

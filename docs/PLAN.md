@@ -10,15 +10,16 @@ after admin review. Two surfaces: a public site (Spanish only) and a backoffice.
 
 ## 1. Confirmed decisions
 
-| Topic         | Decision                                                                                                                                                                                                     |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Repository    | `dr-politicians`, Next.js 16 App Router, TypeScript, Tailwind 4, pnpm                                                                                                                                        |
-| Site language | Spanish only (UI and content). Code identifiers and docs in English. No i18n layer.                                                                                                                          |
-| Database      | Postgres (Neon via Vercel Marketplace) + Drizzle ORM and migrations                                                                                                                                          |
-| Auth          | Better Auth: Google OAuth + username/password (`username` plugin), roles via `admin` plugin                                                                                                                  |
-| Hosting       | Vercel (app, Cron), Vercel Blob (politician photos)                                                                                                                                                          |
-| Scope         | Every living politician (§3); rolled out from office-holders since 2016 first, then backfilled to earlier periods                                                                                            |
-| Research flow | Queue lives in the DB. A local Claude Code session claims a job via CLI, researches, writes schema-validated JSON with sources, and submits it as a **draft**. Nothing is public until an admin approves it. |
+| Topic           | Decision                                                                                                                                                                                                     |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Repository      | `dr-politicians`, Next.js 16 App Router, TypeScript, Tailwind 4, pnpm                                                                                                                                        |
+| Site language   | Spanish only (UI and content). Code identifiers and docs in English. No i18n layer.                                                                                                                          |
+| Visual identity | White base with the Dominican flag's blue (`#002d62`, primary: header, links, focus) and red (`#ce1126`, sparing highlight: eyebrows, main call to action). Tokens live in `src/app/globals.css`.            |
+| Database        | Postgres (Neon via Vercel Marketplace) + Drizzle ORM and migrations                                                                                                                                          |
+| Auth            | Better Auth: Google OAuth + username/password (`username` plugin), roles via `admin` plugin                                                                                                                  |
+| Hosting         | Vercel (app, Cron), Vercel Blob (politician photos)                                                                                                                                                          |
+| Scope           | Every living politician (§3); rolled out from office-holders since 2016 first, then backfilled to earlier periods                                                                                            |
+| Research flow   | Queue lives in the DB. A local Claude Code session claims a job via CLI, researches, writes schema-validated JSON with sources, and submits it as a **draft**. Nothing is public until an admin approves it. |
 
 ## 2. Goals and non-goals
 
