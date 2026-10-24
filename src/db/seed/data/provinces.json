@@ -1,0 +1,130 @@
+[
+  {
+    "name": "Azua",
+    "region": "Valdesia"
+  },
+  {
+    "name": "Bahoruco",
+    "region": "Enriquillo"
+  },
+  {
+    "name": "Barahona",
+    "region": "Enriquillo"
+  },
+  {
+    "name": "Dajabón",
+    "region": "Cibao Noroeste"
+  },
+  {
+    "name": "Distrito Nacional",
+    "region": "Ozama"
+  },
+  {
+    "name": "Duarte",
+    "region": "Cibao Nordeste"
+  },
+  {
+    "name": "El Seibo",
+    "region": "Yuma"
+  },
+  {
+    "name": "Elías Piña",
+    "region": "El Valle"
+  },
+  {
+    "name": "Espaillat",
+    "region": "Cibao Norte"
+  },
+  {
+    "name": "Hato Mayor",
+    "region": "Higuamo"
+  },
+  {
+    "name": "Hermanas Mirabal",
+    "region": "Cibao Nordeste"
+  },
+  {
+    "name": "Independencia",
+    "region": "Enriquillo"
+  },
+  {
+    "name": "La Altagracia",
+    "region": "Yuma"
+  },
+  {
+    "name": "La Romana",
+    "region": "Yuma"
+  },
+  {
+    "name": "La Vega",
+    "region": "Cibao Sur"
+  },
+  {
+    "name": "María Trinidad Sánchez",
+    "region": "Cibao Nordeste"
+  },
+  {
+    "name": "Monseñor Nouel",
+    "region": "Cibao Sur"
+  },
+  {
+    "name": "Monte Cristi",
+    "region": "Cibao Noroeste"
+  },
+  {
+    "name": "Monte Plata",
+    "region": "Higuamo"
+  },
+  {
+    "name": "Pedernales",
+    "region": "Enriquillo"
+  },
+  {
+    "name": "Peravia",
+    "region": "Valdesia"
+  },
+  {
+    "name": "Puerto Plata",
+    "region": "Cibao Norte"
+  },
+  {
+    "name": "Samaná",
+    "region": "Cibao Nordeste"
+  },
+  {
+    "name": "San Cristóbal",
+    "region": "Valdesia"
+  },
+  {
+    "name": "San José de Ocoa",
+    "region": "Valdesia"
+  },
+  {
+    "name": "San Juan",
+    "region": "El Valle"
+  },
+  {
+    "name": "San Pedro de Macorís",
+    "region": "Higuamo"
+  },
+  {
+    "name": "Santiago",
+    "region": "Cibao Norte"
+  },
+  {
+    "name": "Santiago Rodríguez",
+    "region": "Cibao Noroeste"
+  },
+  {
+    "name": "Santo Domingo",
+    "region": "Ozama"
+  },
+  {
+    "name": "Sánchez Ramírez",
+    "region": "Cibao Sur"
+  },
+  {
+    "name": "Valverde",
+    "region": "Cibao Noroeste"
+  }
+]

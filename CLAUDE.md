@@ -8,9 +8,13 @@ Public site (Spanish only) + admin backoffice. The plan and decisions live in
 
 ## Commands
 
-- `pnpm dev` — dev server
-- `pnpm lint` — ESLint
-- `pnpm build` — production build
+- `pnpm db:up && pnpm db:migrate && pnpm db:seed` — local Postgres (Docker, port 54329)
+- `pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm build` — what CI runs
+- `pnpm e2e` — Playwright
+- `pnpm db:generate` after editing `src/db/schema/*`; hand-written SQL goes in a
+  `drizzle-kit generate --custom` migration
+
+Full command list: README.md.
 
 ## Boundaries
 

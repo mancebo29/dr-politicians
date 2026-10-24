@@ -10,14 +10,14 @@ after admin review. Two surfaces: a public site (Spanish only) and a backoffice.
 
 ## 1. Confirmed decisions
 
-| Topic | Decision |
-| --- | --- |
-| Repository | `dr-politicians`, Next.js 16 App Router, TypeScript, Tailwind 4, pnpm |
-| Site language | Spanish only (UI and content). Code identifiers and docs in English. No i18n layer. |
-| Database | Postgres (Neon via Vercel Marketplace) + Drizzle ORM and migrations |
-| Auth | Better Auth: Google OAuth + username/password (`username` plugin), roles via `admin` plugin |
-| Hosting | Vercel (app, Cron), Vercel Blob (politician photos) |
-| Scope | Every living politician (§3); rolled out from office-holders since 2016 first, then backfilled to earlier periods |
+| Topic         | Decision                                                                                                                                                                                                     |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Repository    | `dr-politicians`, Next.js 16 App Router, TypeScript, Tailwind 4, pnpm                                                                                                                                        |
+| Site language | Spanish only (UI and content). Code identifiers and docs in English. No i18n layer.                                                                                                                          |
+| Database      | Postgres (Neon via Vercel Marketplace) + Drizzle ORM and migrations                                                                                                                                          |
+| Auth          | Better Auth: Google OAuth + username/password (`username` plugin), roles via `admin` plugin                                                                                                                  |
+| Hosting       | Vercel (app, Cron), Vercel Blob (politician photos)                                                                                                                                                          |
+| Scope         | Every living politician (§3); rolled out from office-holders since 2016 first, then backfilled to earlier periods                                                                                            |
 | Research flow | Queue lives in the DB. A local Claude Code session claims a job via CLI, researches, writes schema-validated JSON with sources, and submits it as a **draft**. Nothing is public until an admin approves it. |
 
 ## 2. Goals and non-goals
@@ -33,7 +33,7 @@ after admin review. Two surfaces: a public site (Spanish only) and a backoffice.
 **Non-goals (for v1)**
 
 - English or other locales.
-- Opinion polling or approval ratings. The ranking measures *news prominence*, not approval, and the UI must say so (label: "Relevancia en noticias").
+- Opinion polling or approval ratings. The ranking measures _news prominence_, not approval, and the UI must say so (label: "Relevancia en noticias").
 - Comment voting, private messaging, user profiles beyond a display name.
 - Fully automated in-app AI research (possible later; see §12).
 - Politicians editing their own profiles directly (they can submit corrections through feedback; see §9).
@@ -44,20 +44,20 @@ after admin review. Two surfaces: a public site (Spanish only) and a backoffice.
 regardless of when. Coverage is rolled out in two scope stages (distinct from the
 delivery phases in §11):
 
-| Stage | Who | Notes |
-| --- | --- | --- |
+| Stage             | Who                                                           | Notes                                                                      |
+| ----------------- | ------------------------------------------------------------- | -------------------------------------------------------------------------- |
 | **Scope stage 1** | Living people who **hold or held since 2016** an office below | Covers the 2016, 2020 and 2024 electoral periods. Drives waves 0–5 (§6.5). |
-| **Scope stage 2** | Living people who held an office below **before 2016** | Backfilled newest period first (2012, 2010, 2006, …). Waves 6+ (§6.5). |
+| **Scope stage 2** | Living people who held an office below **before 2016**        | Backfilled newest period first (2012, 2010, 2006, …). Waves 6+ (§6.5).     |
 
 Offices (same tiers for both stages):
 
-| Tier | Offices | Approx. count |
-| --- | --- | --- |
-| National executive | President, Vice President, ministers, key directors of autonomous bodies | ~40 |
-| Legislative | Senators (32: 31 provinces + Distrito Nacional), deputies (190), Parlacen deputies (20) | ~240 per term |
-| Local | Mayors (alcaldes) of the 158 municipalities, district directors | ~160+ |
-| Party leadership | Presidents/secretaries-general of parties with congressional representation | ~15 |
-| Candidates | Presidential and vice-presidential candidates in 2020 and 2024 | ~20 |
+| Tier               | Offices                                                                                 | Approx. count |
+| ------------------ | --------------------------------------------------------------------------------------- | ------------- |
+| National executive | President, Vice President, ministers, key directors of autonomous bodies                | ~40           |
+| Legislative        | Senators (32: 31 provinces + Distrito Nacional), deputies (190), Parlacen deputies (20) | ~240 per term |
+| Local              | Mayors (alcaldes) of the 158 municipalities, district directors                         | ~160+         |
+| Party leadership   | Presidents/secretaries-general of parties with congressional representation             | ~15           |
+| Candidates         | Presidential and vice-presidential candidates in 2020 and 2024                          | ~20           |
 
 Counts are illustrative and must be confirmed from official sources during seeding.
 For stage 1 (three electoral periods with turnover) expect roughly **600–900 unique
@@ -89,7 +89,7 @@ and ranking but remains reachable by search and URL.
 
 - **Rendering**: profile and list pages are server-rendered and cached (Cache Components / `use cache`); publishing a profile or a weekly ranking update invalidates the relevant cache tags. Comments load dynamically.
 - **Search**: Postgres full-text search with `unaccent` + `pg_trgm` so "Jose", "José" and partial names match. No external search service at this scale.
-- **Server boundary**: all writes go through Server Actions or route handlers with explicit role checks; the admin area is gated in `proxy.ts` *and* re-checked in every action (proxy alone is not an authorization boundary).
+- **Server boundary**: all writes go through Server Actions or route handlers with explicit role checks; the admin area is gated in `proxy.ts` _and_ re-checked in every action (proxy alone is not an authorization boundary).
 - **Next.js 16 note**: read `node_modules/next/dist/docs/` before writing framework code (see `AGENTS.md`); `middleware` is now `proxy`, caching APIs differ from older versions.
 
 ### Proposed directory layout
@@ -197,17 +197,74 @@ Illustrative shape:
 ```jsonc
 {
   "schemaVersion": 1,
-  "politician": { "fullName": "...", "knownAs": "...", "aliases": [], "birthDate": "YYYY-MM-DD|null", "summary": "...", "summarySourceIds": ["s1"] },
-  "positions":        [{ "title": "Senador", "institution": "Senado", "province": "Santiago", "start": "2020-08-16", "end": "2024-08-16", "howObtained": "elected", "sourceIds": ["s2"] }],
-  "partyMemberships": [{ "party": "PRM", "role": "member", "start": "2014", "end": null, "sourceIds": ["s3"] }],
-  "alliances":        [{ "counterparty": "...", "kind": "faction", "description": "...", "sourceIds": [] }],
-  "legislation":      [{ "number": "Ley 1-24", "title": "...", "involvement": "author", "status": "promulgated", "sourceIds": [] }],
-  "statements":       [{ "kind": "statement", "topic": "...", "quote": "...", "context": "...", "saidOn": "...", "sourceIds": [] }],
-  "controversies":    [{ "title": "...", "summary": "...", "legalStatus": "under_investigation", "politicianResponse": "...", "sourceIds": [] }],
-  "photo":            { "url": "...", "license": "CC BY-SA 4.0", "sourceId": "s9" },
-  "sources":          [{ "id": "s1", "url": "...", "title": "...", "publisher": "...", "publishedOn": "...", "accessedOn": "...", "tier": "official", "excerpt": "..." }],
-  "gaps":             ["Could not confirm end date of 2012 ministry role"],
-  "confidenceNotes":  "..."
+  "politician": {
+    "fullName": "...",
+    "knownAs": "...",
+    "aliases": [],
+    "birthDate": "YYYY-MM-DD|null",
+    "summary": "...",
+    "summarySourceIds": ["s1"],
+  },
+  "positions": [
+    {
+      "title": "Senador",
+      "institution": "Senado",
+      "province": "Santiago",
+      "start": "2020-08-16",
+      "end": "2024-08-16",
+      "howObtained": "elected",
+      "sourceIds": ["s2"],
+    },
+  ],
+  "partyMemberships": [
+    { "party": "PRM", "role": "member", "start": "2014", "end": null, "sourceIds": ["s3"] },
+  ],
+  "alliances": [
+    { "counterparty": "...", "kind": "faction", "description": "...", "sourceIds": [] },
+  ],
+  "legislation": [
+    {
+      "number": "Ley 1-24",
+      "title": "...",
+      "involvement": "author",
+      "status": "promulgated",
+      "sourceIds": [],
+    },
+  ],
+  "statements": [
+    {
+      "kind": "statement",
+      "topic": "...",
+      "quote": "...",
+      "context": "...",
+      "saidOn": "...",
+      "sourceIds": [],
+    },
+  ],
+  "controversies": [
+    {
+      "title": "...",
+      "summary": "...",
+      "legalStatus": "under_investigation",
+      "politicianResponse": "...",
+      "sourceIds": [],
+    },
+  ],
+  "photo": { "url": "...", "license": "CC BY-SA 4.0", "sourceId": "s9" },
+  "sources": [
+    {
+      "id": "s1",
+      "url": "...",
+      "title": "...",
+      "publisher": "...",
+      "publishedOn": "...",
+      "accessedOn": "...",
+      "tier": "official",
+      "excerpt": "...",
+    },
+  ],
+  "gaps": ["Could not confirm end date of 2012 ministry role"],
+  "confidenceNotes": "...",
 }
 ```
 
@@ -233,15 +290,15 @@ Illustrative shape:
 
 ### 6.5 Waves (chunking)
 
-| Wave | Who | Size |
-| --- | --- | --- |
-| 0 — Pilot | 3 well-documented figures from different parties | 3 |
-| 1 | President, VP, 2024 presidential candidates, party leaders, Senate and Chamber presidents, top ministers | ~25 |
-| 2 | All current senators, remaining ministers | ~50 |
-| 3 | Current deputies | ~190 |
-| 4 | Mayors of the 20 largest municipalities, Parlacen | ~40 |
-| 5 | Remaining mayors, former officials since 2016, candidates | rest of stage 1 |
-| 6+ | Scope stage 2: living office-holders from before 2016, one electoral period per wave, newest first; within a period, national executive and senators before deputies and mayors | sized per period |
+| Wave      | Who                                                                                                                                                                             | Size             |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
+| 0 — Pilot | 3 well-documented figures from different parties                                                                                                                                | 3                |
+| 1         | President, VP, 2024 presidential candidates, party leaders, Senate and Chamber presidents, top ministers                                                                        | ~25              |
+| 2         | All current senators, remaining ministers                                                                                                                                       | ~50              |
+| 3         | Current deputies                                                                                                                                                                | ~190             |
+| 4         | Mayors of the 20 largest municipalities, Parlacen                                                                                                                               | ~40              |
+| 5         | Remaining mayors, former officials since 2016, candidates                                                                                                                       | rest of stage 1  |
+| 6+        | Scope stage 2: living office-holders from before 2016, one electoral period per wave, newest first; within a period, national executive and senators before deputies and mayors | sized per period |
 
 Before the first weekly ranking exists, wave order is set manually. Afterwards, refresh jobs are queued automatically for the top-N ranked politicians whose profile is older than a configurable age (default 90 days) — admin approves the batch.
 
@@ -249,15 +306,15 @@ Before the first weekly ranking exists, wave order is set manually. Afterwards, 
 
 ### 7.1 Pages
 
-| Route | Content |
-| --- | --- |
-| `/` | Ranked list: photo, full name, current party (badge), current role, province, rank change vs last week. Search bar + filters (party, current role, province). Paginated. "Relevancia en noticias, actualizado semanalmente" with link to methodology. |
-| `/politicos/[slug]` | Header (photo, name, party, current role). Sections: Resumen y trayectoria (timeline of positions with provinces), Leyes e iniciativas, Partidos y alianzas, Declaraciones e influencias, Controversias. Numbered source footnotes per claim; "Fuentes" list with publisher, date, original + archived link. "Última actualización" + revision note. "Reportar un error" button. Comments. |
-| `/partidos/[slug]`, `/provincias/[slug]` | Filtered lists (SEO-friendly landing pages). |
-| `/metodologia` | How profiles are researched (AI-assisted, human-reviewed), source rules, ranking method, corrections policy. |
-| `/feedback` | General feedback form; profile-level corrections prefill politician + section. |
-| `/iniciar-sesion`, `/registro`, `/recuperar-contrasena` | Auth. |
-| `/privacidad`, `/terminos` | Legal pages (content from site settings). |
+| Route                                                   | Content                                                                                                                                                                                                                                                                                                                                                                                    |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/`                                                     | Ranked list: photo, full name, current party (badge), current role, province, rank change vs last week. Search bar + filters (party, current role, province). Paginated. "Relevancia en noticias, actualizado semanalmente" with link to methodology.                                                                                                                                      |
+| `/politicos/[slug]`                                     | Header (photo, name, party, current role). Sections: Resumen y trayectoria (timeline of positions with provinces), Leyes e iniciativas, Partidos y alianzas, Declaraciones e influencias, Controversias. Numbered source footnotes per claim; "Fuentes" list with publisher, date, original + archived link. "Última actualización" + revision note. "Reportar un error" button. Comments. |
+| `/partidos/[slug]`, `/provincias/[slug]`                | Filtered lists (SEO-friendly landing pages).                                                                                                                                                                                                                                                                                                                                               |
+| `/metodologia`                                          | How profiles are researched (AI-assisted, human-reviewed), source rules, ranking method, corrections policy.                                                                                                                                                                                                                                                                               |
+| `/feedback`                                             | General feedback form; profile-level corrections prefill politician + section.                                                                                                                                                                                                                                                                                                             |
+| `/iniciar-sesion`, `/registro`, `/recuperar-contrasena` | Auth.                                                                                                                                                                                                                                                                                                                                                                                      |
+| `/privacidad`, `/terminos`                              | Legal pages (content from site settings).                                                                                                                                                                                                                                                                                                                                                  |
 
 ### 7.2 Search and filters
 
@@ -340,18 +397,18 @@ This site publishes claims about real people, including controversies. Treat thi
 
 Each phase ends with its acceptance checks passing. Phases 4–6 can overlap once Phase 2 is done.
 
-| # | Phase | Key deliverables | Acceptance |
-| --- | --- | --- | --- |
-| 0 | Foundations | Next.js scaffold ✅, CLAUDE.md ✅, this plan ✅; Prettier, Vitest, Playwright, GitHub Actions (lint, typecheck, test, build), Neon dev branch, Drizzle config, env schema (`@t3-oss/env-nextjs` or Zod) | `pnpm lint && pnpm typecheck && pnpm test && pnpm build` green in CI |
-| 1 | Data model & reference data | Drizzle schema (§5), migrations, seed of provinces, municipalities, parties, institutions from official sources; 2 hand-written sample profiles for UI work | Migrations apply on a fresh DB; seed is idempotent; FK/enum constraints tested |
-| 2 | Auth & roles | Better Auth (Google + username/password, email verification via Resend), roles, `admin:promote` script, `proxy.ts` gate for `/admin`, sign-in/up pages | E2E: register, verify, login, logout, Google login (manual check), non-admin blocked from `/admin` and admin actions |
-| 3 | Research pipeline + pilot | Zod contract, research API (claim/submit/heartbeat), CLI, tokens, research skill, admin queue + review + publish with revisions; pilot of 3 profiles | 3 pilot profiles published end-to-end; every claim has a source; lease expiry and invalid-payload rejection tested; time/cost per profile recorded |
-| 4 | Public site | Ranked list (manual order until Phase 6), profile page with footnoted sources, party/province pages, search + filters, methodology page, SEO (metadata, sitemap, OG images) | E2E search/filter cases incl. accent-insensitive; profile renders all sections with working source links; Lighthouse ≥ 90 on list and profile |
-| 5 | Community & moderation | Comments with replies, reports, auto-hide, feedback form, Turnstile, rate limits; admin moderation, feedback inbox, users, site settings, audit log | E2E: comment, reply, edit window, report → auto-hide → moderator restore; banned user cannot post; settings changes take effect |
-| 6 | Ranking | Spike (GDELT vs RSS), ingestion, scoring, cron, snapshots, rank deltas, auto-refresh queueing | Spike report with coverage numbers; scoring unit-tested; cron rerun idempotent; list shows weekly rank |
-| 7 | Wave 1 + launch readiness | Wave 1 (~25 profiles) researched and reviewed; legal review done; privacy/terms published; monitoring (Vercel Analytics, error tracking); backups verified (Neon PITR) | Legal sign-off recorded; restore drill done; production deploy approved by owner |
-| 8 | Waves 2–5 (complete scope stage 1) | Steady-state research cadence; periodic refreshes | Per-wave: all profiles reviewed, broken-link check passes |
-| 9+ | Waves 6+ (scope stage 2 backfill) | Roster of living pre-2016 office-holders per period from JCE/Congress records, then research by period | Per-period roster reviewed before queueing; same per-wave checks |
+| #   | Phase                              | Key deliverables                                                                                                                                                                                        | Acceptance                                                                                                                                         |
+| --- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0   | Foundations                        | Next.js scaffold ✅, CLAUDE.md ✅, this plan ✅; Prettier, Vitest, Playwright, GitHub Actions (lint, typecheck, test, build), Neon dev branch, Drizzle config, env schema (`@t3-oss/env-nextjs` or Zod) | `pnpm lint && pnpm typecheck && pnpm test && pnpm build` green in CI                                                                               |
+| 1   | Data model & reference data        | Drizzle schema (§5), migrations, seed of provinces, municipalities, parties, institutions from official sources; 2 hand-written sample profiles for UI work                                             | Migrations apply on a fresh DB; seed is idempotent; FK/enum constraints tested                                                                     |
+| 2   | Auth & roles                       | Better Auth (Google + username/password, email verification via Resend), roles, `admin:promote` script, `proxy.ts` gate for `/admin`, sign-in/up pages                                                  | E2E: register, verify, login, logout, Google login (manual check), non-admin blocked from `/admin` and admin actions                               |
+| 3   | Research pipeline + pilot          | Zod contract, research API (claim/submit/heartbeat), CLI, tokens, research skill, admin queue + review + publish with revisions; pilot of 3 profiles                                                    | 3 pilot profiles published end-to-end; every claim has a source; lease expiry and invalid-payload rejection tested; time/cost per profile recorded |
+| 4   | Public site                        | Ranked list (manual order until Phase 6), profile page with footnoted sources, party/province pages, search + filters, methodology page, SEO (metadata, sitemap, OG images)                             | E2E search/filter cases incl. accent-insensitive; profile renders all sections with working source links; Lighthouse ≥ 90 on list and profile      |
+| 5   | Community & moderation             | Comments with replies, reports, auto-hide, feedback form, Turnstile, rate limits; admin moderation, feedback inbox, users, site settings, audit log                                                     | E2E: comment, reply, edit window, report → auto-hide → moderator restore; banned user cannot post; settings changes take effect                    |
+| 6   | Ranking                            | Spike (GDELT vs RSS), ingestion, scoring, cron, snapshots, rank deltas, auto-refresh queueing                                                                                                           | Spike report with coverage numbers; scoring unit-tested; cron rerun idempotent; list shows weekly rank                                             |
+| 7   | Wave 1 + launch readiness          | Wave 1 (~25 profiles) researched and reviewed; legal review done; privacy/terms published; monitoring (Vercel Analytics, error tracking); backups verified (Neon PITR)                                  | Legal sign-off recorded; restore drill done; production deploy approved by owner                                                                   |
+| 8   | Waves 2–5 (complete scope stage 1) | Steady-state research cadence; periodic refreshes                                                                                                                                                       | Per-wave: all profiles reviewed, broken-link check passes                                                                                          |
+| 9+  | Waves 6+ (scope stage 2 backfill)  | Roster of living pre-2016 office-holders per period from JCE/Congress records, then research by period                                                                                                  | Per-period roster reviewed before queueing; same per-wave checks                                                                                   |
 
 ## 12. Later / optional
 
@@ -363,17 +420,17 @@ Each phase ends with its acceptance checks passing. Phases 4–6 can overlap onc
 
 ## 13. Risks
 
-| Risk | Impact | Mitigation |
-| --- | --- | --- |
-| Inaccurate or defamatory claim published | Legal exposure, credibility loss | Mandatory review, controversy source rules, legal-status enum, corrections path, legal review, revision history |
-| Wrong-person attribution (common names) | Incorrect profiles and rankings | Disambiguation step in research, `news_query` per profile, spike false-positive measurement |
-| Link rot | Sources stop backing claims | Wayback archiving, weekly broken-link check job |
-| Comment abuse / spam | Toxic content, liability | Verification, Turnstile, rate limits, reports + auto-hide, pre-moderation toggle, bans |
-| Weak DR coverage in news APIs | Meaningless ranking | Spike first; RSS fallback; label as news prominence |
-| Research cost/time at 600–900 profiles (stage 1), more for stage 2 | Slow rollout | Pilot measurement, wave sizing, refresh only when stale |
-| Thin online sources for pre-2016 figures | Sparse or unverifiable stage 2 profiles | Allow shorter profiles with explicit `gaps`; prefer official records (JCE, Gaceta Oficial); never fill gaps without sources |
-| Living status unknown or out of date | Profiling deceased people as living | Living check in every research job and refresh; deceased handling in §3 |
-| Political neutrality perception | Credibility | Same rules for all parties, methodology page, wave mix across parties, audit trail |
+| Risk                                                               | Impact                                  | Mitigation                                                                                                                  |
+| ------------------------------------------------------------------ | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Inaccurate or defamatory claim published                           | Legal exposure, credibility loss        | Mandatory review, controversy source rules, legal-status enum, corrections path, legal review, revision history             |
+| Wrong-person attribution (common names)                            | Incorrect profiles and rankings         | Disambiguation step in research, `news_query` per profile, spike false-positive measurement                                 |
+| Link rot                                                           | Sources stop backing claims             | Wayback archiving, weekly broken-link check job                                                                             |
+| Comment abuse / spam                                               | Toxic content, liability                | Verification, Turnstile, rate limits, reports + auto-hide, pre-moderation toggle, bans                                      |
+| Weak DR coverage in news APIs                                      | Meaningless ranking                     | Spike first; RSS fallback; label as news prominence                                                                         |
+| Research cost/time at 600–900 profiles (stage 1), more for stage 2 | Slow rollout                            | Pilot measurement, wave sizing, refresh only when stale                                                                     |
+| Thin online sources for pre-2016 figures                           | Sparse or unverifiable stage 2 profiles | Allow shorter profiles with explicit `gaps`; prefer official records (JCE, Gaceta Oficial); never fill gaps without sources |
+| Living status unknown or out of date                               | Profiling deceased people as living     | Living check in every research job and refresh; deceased handling in §3                                                     |
+| Political neutrality perception                                    | Credibility                             | Same rules for all parties, methodology page, wave mix across parties, audit trail                                          |
 
 ## 14. Open questions
 

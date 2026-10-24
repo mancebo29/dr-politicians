@@ -1,0 +1,31 @@
+# Local development database. Data lives in the named volume `pgdata`;
+# `pnpm db:down` keeps it, `pnpm db:reset` deletes it (see README).
+name: dr-politicians
+
+services:
+  postgres:
+    image: postgres:17.6-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: dr_politicians
+    ports:
+      - "127.0.0.1:${DB_PORT:-54329}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d dr_politicians"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    stop_grace_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+    mem_limit: 1g
+
+volumes:
+  pgdata:

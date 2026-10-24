@@ -1,0 +1,802 @@
+[
+  {
+    "name": "Azua",
+    "province": "Azua",
+    "createdOn": "1845-03-05"
+  },
+  {
+    "name": "Estebanía",
+    "province": "Azua",
+    "createdOn": "2001-11-20"
+  },
+  {
+    "name": "Guayabal",
+    "province": "Azua",
+    "createdOn": "2004-08-03"
+  },
+  {
+    "name": "Las Charcas",
+    "province": "Azua",
+    "createdOn": "2001-09-15"
+  },
+  {
+    "name": "Las Yayas de Viajama",
+    "province": "Azua",
+    "createdOn": "2001-05-01"
+  },
+  {
+    "name": "Padre Las Casas",
+    "province": "Azua",
+    "createdOn": "1938-06-27"
+  },
+  {
+    "name": "Peralta",
+    "province": "Azua",
+    "createdOn": "1976-03-07"
+  },
+  {
+    "name": "Pueblo Viejo",
+    "province": "Azua",
+    "createdOn": "2003-05-01"
+  },
+  {
+    "name": "Sabana Yegua",
+    "province": "Azua",
+    "createdOn": "2003-05-01"
+  },
+  {
+    "name": "Tábara Arriba",
+    "province": "Azua",
+    "createdOn": "2004-01-20"
+  },
+  {
+    "name": "Galván",
+    "province": "Bahoruco",
+    "createdOn": "1998-07-01"
+  },
+  {
+    "name": "Los Ríos",
+    "province": "Bahoruco",
+    "createdOn": "2001-11-27"
+  },
+  {
+    "name": "Neiba",
+    "province": "Bahoruco",
+    "createdOn": "1845-03-05"
+  },
+  {
+    "name": "Tamayo",
+    "province": "Bahoruco",
+    "createdOn": "1938-06-27"
+  },
+  {
+    "name": "Villa Jaragua",
+    "province": "Bahoruco",
+    "createdOn": "1976-02-28"
+  },
+  {
+    "name": "Barahona",
+    "province": "Barahona",
+    "createdOn": "1845-03-05"
+  },
+  {
+    "name": "Cabral",
+    "province": "Barahona",
+    "createdOn": "1907-09-09"
+  },
+  {
+    "name": "El Peñón",
+    "province": "Barahona",
+    "createdOn": "2002-12-16"
+  },
+  {
+    "name": "Enriquillo",
+    "province": "Barahona",
+    "createdOn": "1907-09-09"
+  },
+  {
+    "name": "Fundación",
+    "province": "Barahona",
+    "createdOn": "2003-07-16"
+  },
+  {
+    "name": "Jaquimeyes",
+    "province": "Barahona",
+    "createdOn": "2004-07-07"
+  },
+  {
+    "name": "La Ciénaga",
+    "province": "Barahona",
+    "createdOn": "2004-07-30"
+  },
+  {
+    "name": "Las Salinas",
+    "province": "Barahona",
+    "createdOn": "2001-03-08"
+  },
+  {
+    "name": "Paraíso",
+    "province": "Barahona",
+    "createdOn": "1976-02-29"
+  },
+  {
+    "name": "Polo",
+    "province": "Barahona",
+    "createdOn": "2001-09-30"
+  },
+  {
+    "name": "Vicente Noble",
+    "province": "Barahona",
+    "createdOn": "1976-03-03"
+  },
+  {
+    "name": "Dajabón",
+    "province": "Dajabón",
+    "createdOn": "1845-03-05"
+  },
+  {
+    "name": "El Pino",
+    "province": "Dajabón",
+    "createdOn": "2002-01-18"
+  },
+  {
+    "name": "Loma de Cabrera",
+    "province": "Dajabón",
+    "createdOn": "1938-06-27"
+  },
+  {
+    "name": "Partido",
+    "province": "Dajabón",
+    "createdOn": "1996-09-19"
+  },
+  {
+    "name": "Restauración",
+    "province": "Dajabón",
+    "createdOn": "1892-06-23"
+  },
+  {
+    "name": "Santo Domingo",
+    "province": "Distrito Nacional",
+    "createdOn": "1845-03-05"
+  },
+  {
+    "name": "Arenoso",
+    "province": "Duarte",
+    "createdOn": "1994-01-01"
+  },
+  {
+    "name": "Castillo",
+    "province": "Duarte",
+    "createdOn": "1907-09-09"
+  },
+  {
+    "name": "Hostos",
+    "province": "Duarte",
+    "createdOn": "2004-03-05"
+  },
+  {
+    "name": "Las Guáranas",
+    "province": "Duarte",
+    "createdOn": "1998-07-22"
+  },
+  {
+    "name": "Pimentel",
+    "province": "Duarte",
+    "createdOn": "1907-09-09"
+  },
+  {
+    "name": "San Francisco de Macorís",
+    "province": "Duarte",
+    "createdOn": "1845-03-05"
+  },
+  {
+    "name": "Villa Riva",
+    "province": "Duarte",
+    "createdOn": "1845-03-05"
+  },
+  {
+    "name": "El Seibo",
+    "province": "El Seibo",
+    "createdOn": "1845-03-05"
+  },
+  {
+    "name": "Miches",
+    "province": "El Seibo",
+    "createdOn": "1883-08-08"
+  },
+  {
+    "name": "Bánica",
+    "province": "Elías Piña",
+    "createdOn": "1845-03-05"
+  },
+  {
+    "name": "Comendador",
+    "province": "Elías Piña",
+    "createdOn": "1880-04-25"
+  },
+  {
+    "name": "El Llano",
+    "province": "Elías Piña",
+    "createdOn": "1976-03-01"
+  },
+  {
+    "name": "Hondo Valle",
+    "province": "Elías Piña",
+    "createdOn": "1978-08-12"
+  },
+  {
+    "name": "Juan Santiago",
+    "province": "Elías Piña",
+    "createdOn": "2005-05-09"
+  },
+  {
+    "name": "Pedro Santana",
+    "province": "Elías Piña",
+    "createdOn": "1952-03-03"
+  },
+  {
+    "name": "Cayetano Germosén",
+    "province": "Espaillat",
+    "createdOn": "1994-01-01"
+  },
+  {
+    "name": "Gaspar Hernández",
+    "province": "Espaillat",
+    "createdOn": "1907-09-09"
+  },
+  {
+    "name": "Jamao Al Norte",
+    "province": "Espaillat",
+    "createdOn": "2001-05-25"
+  },
+  {
+    "name": "Moca",
+    "province": "Espaillat",
+    "createdOn": "1845-03-05"
+  },
+  {
+    "name": "San Víctor",
+    "province": "Espaillat",
+    "createdOn": "2014-08-29"
+  },
+  {
+    "name": "El Valle",
+    "province": "Hato Mayor",
+    "createdOn": "1976-03-09"
+  },
+  {
+    "name": "Hato Mayor",
+    "province": "Hato Mayor",
+    "createdOn": "1845-03-05"
+  },
+  {
+    "name": "Sabana de la Mar",
+    "province": "Hato Mayor",
+    "createdOn": "1845-03-05"
+  },
+  {
+    "name": "Salcedo",
+    "province": "Hermanas Mirabal",
+    "createdOn": "1845-03-05"
+  },
+  {
+    "name": "Tenares",
+    "province": "Hermanas Mirabal",
+    "createdOn": "1938-06-27"
+  },
+  {
+    "name": "Villa Tapia",
+    "province": "Hermanas Mirabal",
+    "createdOn": "1845-03-05"
+  },
+  {
+    "name": "Cristóbal",
+    "province": "Independencia",
+    "createdOn": "2003-08-03"
+  },
+  {
+    "name": "Duvergé",
+    "province": "Independencia",
+    "createdOn": "1893-07-27"
+  },
+  {
+    "name": "Jimaní",
+    "province": "Independencia",
+    "createdOn": "1945-06-04"
+  },
+  {
+    "name": "La Descubierta",
+    "province": "Independencia",
+    "createdOn": "1938-06-27"
+  },
+  {
+    "name": "Mella",
+    "province": "Independencia",
+    "createdOn": "2004-03-22"
+  },
+  {
+    "name": "Postrer Río",
+    "province": "Independencia",
+    "createdOn": "1982-05-04"
+  },
+  {
+    "name": "Higüey",
+    "province": "La Altagracia",
+    "createdOn": "1845-03-05"
+  },
+  {
+    "name": "San Rafael del Yuma",
+    "province": "La Altagracia",
+    "createdOn": "1959-08-11"
+  },
+  {
+    "name": "Guaymate",
+    "province": "La Romana",
+    "createdOn": "1959-10-01"
+  },
+  {
+    "name": "La Romana",
+    "province": "La Romana",
+    "createdOn": "1897-02-27"
+  },
+  {
+    "name": "Villa Hermosa",
+    "province": "La Romana",
+    "createdOn": "2004-07-28"
+  },
+  {
+    "name": "Constanza",
+    "province": "La Vega",
+    "createdOn": "1858-03-09"
+  },
+  {
+    "name": "Jarabacoa",
+    "province": "La Vega",
+    "createdOn": "1858-03-09"
+  },
+  {
+    "name": "Jima Abajo",
+    "province": "La Vega",
+    "createdOn": "1996-09-19"
+  },
+  {
+    "name": "La Vega",
+    "province": "La Vega",
+    "createdOn": "1845-03-05"
+  },
+  {
+    "name": "Cabrera",
+    "province": "María Trinidad Sánchez",
+    "createdOn": "1870-02-27"
+  },
+  {
+    "name": "El Factor",
+    "province": "María Trinidad Sánchez",
+    "createdOn": "1988-04-25"
+  },
+  {
+    "name": "Nagua",
+    "province": "María Trinidad Sánchez",
+    "createdOn": "1882-10-07"
+  },
+  {
+    "name": "Río San Juan",
+    "province": "María Trinidad Sánchez",
+    "createdOn": "1946-03-27"
+  },
+  {
+    "name": "Bonao",
+    "province": "Monseñor Nouel",
+    "createdOn": "1845-03-05"
+  },
+  {
+    "name": "Maimón",
+    "province": "Monseñor Nouel",
+    "createdOn": "1982-09-22"
+  },
+  {
+    "name": "Piedra Blanca",
+    "province": "Monseñor Nouel",
+    "createdOn": "1991-11-30"
+  },
+  {
+    "name": "Castañuelas",
+    "province": "Monte Cristi",
+    "createdOn": "1976-02-27"
+  },
+  {
+    "name": "Guayubín",
+    "province": "Monte Cristi",
+    "createdOn": "1855-05-09"
+  },
+  {
+    "name": "Las Matas de Santa Cruz",
+    "province": "Monte Cristi",
+    "createdOn": "1985-03-18"
+  },
+  {
+    "name": "Monte Cristi",
+    "province": "Monte Cristi",
+    "createdOn": "1845-03-05"
+  },
+  {
+    "name": "Pepillo Salcedo",
+    "province": "Monte Cristi",
+    "createdOn": "1949-08-28"
+  },
+  {
+    "name": "Villa Vásquez",
+    "province": "Monte Cristi",
+    "createdOn": "1938-06-27"
+  },
+  {
+    "name": "Bayaguana",
+    "province": "Monte Plata",
+    "createdOn": "1845-03-05"
+  },
+  {
+    "name": "Monte Plata",
+    "province": "Monte Plata",
+    "createdOn": "1845-03-05"
+  },
+  {
+    "name": "Peralvillo",
+    "province": "Monte Plata",
+    "createdOn": "2004-06-16"
+  },
+  {
+    "name": "Sabana Grande de Boyá",
+    "province": "Monte Plata",
+    "createdOn": "1845-03-05"
+  },
+  {
+    "name": "Yamasá",
+    "province": "Monte Plata",
+    "createdOn": "1907-09-09"
+  },
+  {
+    "name": "Oviedo",
+    "province": "Pedernales",
+    "createdOn": "1950-03-03"
+  },
+  {
+    "name": "Pedernales",
+    "province": "Pedernales",
+    "createdOn": "1938-06-27"
+  },
+  {
+    "name": "Baní",
+    "province": "Peravia",
+    "createdOn": "1845-03-05"
+  },
+  {
+    "name": "Matanzas",
+    "province": "Peravia",
+    "createdOn": "2014-08-19"
+  },
+  {
+    "name": "Nizao",
+    "province": "Peravia",
+    "createdOn": "1988-04-14"
+  },
+  {
+    "name": "Altamira",
+    "province": "Puerto Plata",
+    "createdOn": "1889-07-06"
+  },
+  {
+    "name": "Guananico",
+    "province": "Puerto Plata",
+    "createdOn": "1992-11-30"
+  },
+  {
+    "name": "Imbert",
+    "province": "Puerto Plata",
+    "createdOn": "1907-09-09"
+  },
+  {
+    "name": "Los Hidalgos",
+    "province": "Puerto Plata",
+    "createdOn": "1976-03-10"
+  },
+  {
+    "name": "Luperón",
+    "province": "Puerto Plata",
+    "createdOn": "1945-06-18"
+  },
+  {
+    "name": "Puerto Plata",
+    "province": "Puerto Plata",
+    "createdOn": "1845-03-05"
+  },
+  {
+    "name": "Sosúa",
+    "province": "Puerto Plata",
+    "createdOn": "1976-03-04"
+  },
+  {
+    "name": "Villa Isabela",
+    "province": "Puerto Plata",
+    "createdOn": "1989-05-16"
+  },
+  {
+    "name": "Villa Montellano",
+    "province": "Puerto Plata",
+    "createdOn": "2006-01-21"
+  },
+  {
+    "name": "Las Terrenas",
+    "province": "Samaná",
+    "createdOn": "1996-09-19"
+  },
+  {
+    "name": "Samaná",
+    "province": "Samaná",
+    "createdOn": "1845-03-05"
+  },
+  {
+    "name": "Sánchez",
+    "province": "Samaná",
+    "createdOn": "1907-09-09"
+  },
+  {
+    "name": "Cambita Garabitos",
+    "province": "San Cristóbal",
+    "createdOn": "1987-05-02"
+  },
+  {
+    "name": "Haina",
+    "province": "San Cristóbal",
+    "createdOn": "1980-10-27"
+  },
+  {
+    "name": "Los Cacaos",
+    "province": "San Cristóbal",
+    "createdOn": "2004-02-02"
+  },
+  {
+    "name": "Nigua",
+    "province": "San Cristóbal",
+    "createdOn": "2001-01-11"
+  },
+  {
+    "name": "Sabana Grande de Palenque",
+    "province": "San Cristóbal",
+    "createdOn": "1996-09-19"
+  },
+  {
+    "name": "San Cristóbal",
+    "province": "San Cristóbal",
+    "createdOn": "1845-03-05"
+  },
+  {
+    "name": "Villa Altagracia",
+    "province": "San Cristóbal",
+    "createdOn": "1907-09-09"
+  },
+  {
+    "name": "Yaguate",
+    "province": "San Cristóbal",
+    "createdOn": "1976-03-05"
+  },
+  {
+    "name": "Rancho Arriba",
+    "province": "San José de Ocoa",
+    "createdOn": "1989-05-08"
+  },
+  {
+    "name": "Sabana Larga",
+    "province": "San José de Ocoa",
+    "createdOn": "1991-04-07"
+  },
+  {
+    "name": "San José de Ocoa",
+    "province": "San José de Ocoa",
+    "createdOn": "1845-03-05"
+  },
+  {
+    "name": "Bohechío",
+    "province": "San Juan",
+    "createdOn": "1976-03-02"
+  },
+  {
+    "name": "El Cercado",
+    "province": "San Juan",
+    "createdOn": "1907-09-09"
+  },
+  {
+    "name": "Juan de Herrera",
+    "province": "San Juan",
+    "createdOn": "1992-06-10"
+  },
+  {
+    "name": "Las Matas de Farfán",
+    "province": "San Juan",
+    "createdOn": "1845-03-05"
+  },
+  {
+    "name": "San Juan",
+    "province": "San Juan",
+    "createdOn": "1845-03-05"
+  },
+  {
+    "name": "Vallejuelo",
+    "province": "San Juan",
+    "createdOn": "1976-03-08"
+  },
+  {
+    "name": "Consuelo",
+    "province": "San Pedro de Macorís",
+    "createdOn": "1996-09-19"
+  },
+  {
+    "name": "Guayacanes",
+    "province": "San Pedro de Macorís",
+    "createdOn": "2006-05-03"
+  },
+  {
+    "name": "Los Llanos",
+    "province": "San Pedro de Macorís",
+    "createdOn": "1845-03-05"
+  },
+  {
+    "name": "Quisqueya",
+    "province": "San Pedro de Macorís",
+    "createdOn": "1998-07-01"
+  },
+  {
+    "name": "Ramón Santana",
+    "province": "San Pedro de Macorís",
+    "createdOn": "1894-04-25"
+  },
+  {
+    "name": "San Pedro de Macorís",
+    "province": "San Pedro de Macorís",
+    "createdOn": "1845-03-05"
+  },
+  {
+    "name": "Baitoa",
+    "province": "Santiago",
+    "createdOn": "2016-02-27"
+  },
+  {
+    "name": "Jánico",
+    "province": "Santiago",
+    "createdOn": "1907-09-09"
+  },
+  {
+    "name": "Licey al Medio",
+    "province": "Santiago",
+    "createdOn": "1984-07-13"
+  },
+  {
+    "name": "Puñal",
+    "province": "Santiago",
+    "createdOn": "2006-04-07"
+  },
+  {
+    "name": "Sabana Iglesia",
+    "province": "Santiago",
+    "createdOn": "2007-05-18"
+  },
+  {
+    "name": "San José de las Matas",
+    "province": "Santiago",
+    "createdOn": "1845-03-05"
+  },
+  {
+    "name": "Santiago de los Caballeros",
+    "province": "Santiago",
+    "createdOn": "1845-03-05"
+  },
+  {
+    "name": "Tamboril",
+    "province": "Santiago",
+    "createdOn": "1907-09-09"
+  },
+  {
+    "name": "Villa Bisonó",
+    "province": "Santiago",
+    "createdOn": "1961-10-20"
+  },
+  {
+    "name": "Villa González",
+    "province": "Santiago",
+    "createdOn": "1991-10-19"
+  },
+  {
+    "name": "Monción",
+    "province": "Santiago Rodríguez",
+    "createdOn": "1907-09-09"
+  },
+  {
+    "name": "Sabaneta",
+    "province": "Santiago Rodríguez",
+    "createdOn": "1845-03-05"
+  },
+  {
+    "name": "Villa Los Almácigos",
+    "province": "Santiago Rodríguez",
+    "createdOn": "1996-09-19"
+  },
+  {
+    "name": "Boca Chica",
+    "province": "Santo Domingo",
+    "createdOn": "2003-01-01"
+  },
+  {
+    "name": "La Caleta",
+    "province": "Santo Domingo",
+    "createdOn": null
+  },
+  {
+    "name": "La Victoria",
+    "province": "Santo Domingo",
+    "createdOn": null
+  },
+  {
+    "name": "Los Alcarrizos",
+    "province": "Santo Domingo",
+    "createdOn": "2005-01-31"
+  },
+  {
+    "name": "Pedro Brand",
+    "province": "Santo Domingo",
+    "createdOn": "2005-01-31"
+  },
+  {
+    "name": "San Antonio de Guerra",
+    "province": "Santo Domingo",
+    "createdOn": "2004-03-24"
+  },
+  {
+    "name": "Santo Domingo Este",
+    "province": "Santo Domingo",
+    "createdOn": "2001-10-08"
+  },
+  {
+    "name": "Santo Domingo Norte",
+    "province": "Santo Domingo",
+    "createdOn": "2001-10-08"
+  },
+  {
+    "name": "Santo Domingo Oeste",
+    "province": "Santo Domingo",
+    "createdOn": "2001-10-08"
+  },
+  {
+    "name": "Cevicos",
+    "province": "Sánchez Ramírez",
+    "createdOn": "1895-01-27"
+  },
+  {
+    "name": "Cotuí",
+    "province": "Sánchez Ramírez",
+    "createdOn": "1845-03-05"
+  },
+  {
+    "name": "Fantino",
+    "province": "Sánchez Ramírez",
+    "createdOn": "1961-12-15"
+  },
+  {
+    "name": "La Mata",
+    "province": "Sánchez Ramírez",
+    "createdOn": "2002-08-07"
+  },
+  {
+    "name": "Esperanza",
+    "province": "Valverde",
+    "createdOn": "1907-09-09"
+  },
+  {
+    "name": "Laguna Salada",
+    "province": "Valverde",
+    "createdOn": "1976-03-06"
+  },
+  {
+    "name": "Mao",
+    "province": "Valverde",
+    "createdOn": "1878-05-04"
+  }
+]

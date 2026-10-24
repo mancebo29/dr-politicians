@@ -1,36 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DR Politicians
 
-## Getting Started
+Source-backed profiles of living current and former politicians of the Dominican
+Republic. Public site in Spanish plus an admin backoffice. Scope, architecture and
+roadmap: [docs/PLAN.md](docs/PLAN.md).
 
-First, run the development server:
+## Requirements
+
+- Node.js 22.12+ (24 recommended) and pnpm (version pinned in `package.json`)
+- Docker with Compose v2 (local Postgres)
+
+## Setup
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
+cp .env.example .env.local   # then fill in BETTER_AUTH_SECRET (openssl rand -base64 32)
+pnpm db:up                   # start Postgres on 127.0.0.1:54329 and wait until healthy
+pnpm db:migrate
+pnpm db:seed                 # provinces, municipalities, parties, institutions
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Google sign-in and Resend email are optional in development. Without
+`RESEND_API_KEY`, emails (verification, password reset) are printed to the dev
+server log, or written as JSON files to `MAIL_OUTBOX_DIR` when it is set.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Commands
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command                                              | What it does                                                                                                        |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `pnpm dev` / `pnpm build` / `pnpm start`             | Next.js dev server, production build, production server                                                             |
+| `pnpm lint` / `pnpm typecheck` / `pnpm format:check` | Static checks (CI runs all three)                                                                                   |
+| `pnpm test`                                          | Unit tests and database integration tests (needs `pnpm db:up`; uses `TEST_DATABASE_URL`, which must end in `_test`) |
+| `pnpm e2e`                                           | Playwright end-to-end tests                                                                                         |
+| `pnpm db:generate`                                   | Generate a migration from schema changes in `src/db/schema`                                                         |
+| `pnpm db:migrate` / `pnpm db:seed`                   | Apply migrations / upsert reference data                                                                            |
+| `pnpm db:studio`                                     | Drizzle Studio                                                                                                      |
+| `pnpm admin:promote <email-or-username>`             | Grant the admin role to an existing account                                                                         |
+| `pnpm db:up` / `pnpm db:down`                        | Start / stop local Postgres. Data is kept in the `pgdata` volume.                                                   |
+| `pnpm db:reset`                                      | **Deletes all local dev and test data** (removes the `pgdata` volume) and starts a fresh database                   |
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The integration test setup drops and recreates the schema of the `_test`
+database on every run; it never touches the dev database.
