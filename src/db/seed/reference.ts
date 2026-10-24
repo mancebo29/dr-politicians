@@ -47,11 +47,20 @@ export async function seedReferenceData(db: Database) {
     await tx
       .insert(parties)
       .values(
-        partyData.map((p) => ({ slug: slugify(p.acronym), name: p.name, acronym: p.acronym })),
+        partyData.map((p) => ({
+          slug: slugify(p.acronym),
+          name: p.name,
+          acronym: p.acronym,
+          color: p.color,
+        })),
       )
       .onConflictDoUpdate({
         target: parties.slug,
-        set: { name: sql`excluded.name`, acronym: sql`excluded.acronym` },
+        set: {
+          name: sql`excluded.name`,
+          acronym: sql`excluded.acronym`,
+          color: sql`excluded.color`,
+        },
       });
 
     await tx

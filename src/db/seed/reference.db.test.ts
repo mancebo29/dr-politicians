@@ -41,4 +41,13 @@ describe("seedReferenceData", () => {
       .where(eq(municipalities.slug, "santo-domingo-este"));
     expect(row.province).toBe("Santo Domingo");
   });
+
+  it("gives every party a hex color, restoring it on re-run", async () => {
+    await db.update(parties).set({ color: null }).where(eq(parties.slug, "pld"));
+    await seedReferenceData(db);
+    const rows = await db.select({ slug: parties.slug, color: parties.color }).from(parties);
+    expect(rows).toHaveLength(5);
+    for (const row of rows) expect(row.color).toMatch(/^#[0-9a-f]{6}$/);
+    expect(rows.find((r) => r.slug === "pld")?.color).toBe("#870b9c");
+  });
 });
