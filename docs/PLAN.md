@@ -1,6 +1,6 @@
 # DR Politicians — Project Plan
 
-Status: **draft, pending owner approval** · Written 2026-10-24 · Owner: project admin
+Status: **approved; Phases 0–2 done (2026-10-24)** · Written 2026-10-24 · Owner: project admin
 
 A public, source-backed collection of profiles of all living current and former politicians of
 the Dominican Republic, researched in chunks with Claude Code and published only

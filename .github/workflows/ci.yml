@@ -31,6 +31,7 @@ jobs:
     env:
       DATABASE_URL: postgres://postgres:postgres@localhost:5432/dr_politicians
       TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/dr_politicians_test
+      E2E_DATABASE_URL: postgres://postgres:postgres@localhost:5432/dr_politicians_e2e
       # CI-only placeholder; real secrets live in Vercel and .env.local.
       BETTER_AUTH_SECRET: ci-only-secret-not-used-anywhere-else-000000
       BETTER_AUTH_URL: http://localhost:3000
@@ -42,10 +43,20 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: psql "$DATABASE_URL" -c "create database dr_politicians_test"
+      - run: |
+          psql "$DATABASE_URL" -c "create database dr_politicians_test"
+          psql "$DATABASE_URL" -c "create database dr_politicians_e2e"
       - run: pnpm lint
       - run: pnpm format:check
       - run: pnpm typecheck
       - run: pnpm db:migrate
       - run: pnpm test
       - run: pnpm build
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-traces
+          path: test-results/
+          retention-days: 7

@@ -1,11 +1,14 @@
 import { z } from "zod";
 
-const isProduction = process.env.NODE_ENV === "production";
+// `next build` runs with NODE_ENV=production but only needs to compile, so
+// provider credentials are enforced when the production server starts instead.
+const isProductionRuntime =
+  process.env.NODE_ENV === "production" && process.env.NEXT_PHASE !== "phase-production-build";
 
 // Google and Resend are optional outside production so the app, tests, and CI
 // run without third-party credentials: Google sign-in is hidden and emails go
 // to the dev mail transport (see src/lib/email.ts).
-const requiredInProduction = isProduction ? z.string().min(1) : z.string().min(1).optional();
+const requiredInProduction = isProductionRuntime ? z.string().min(1) : z.string().min(1).optional();
 
 const schema = z.object({
   DATABASE_URL: z.url(),

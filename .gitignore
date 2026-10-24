@@ -40,3 +40,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local scratch (e2e mail outbox)
+/.tmp
+
+# playwright
+/test-results
+/playwright-report

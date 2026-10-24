@@ -22,3 +22,7 @@ Full command list: README.md.
 - Never publish profile data without admin review; research output is a draft.
 - Every profile claim must link to at least one source (see PLAN §6.3).
 - Secrets go in `.env.local` / Vercel env, never in the repo.
+- Every admin page and server action calls `requireRole()` (`src/lib/session.ts`);
+  `src/proxy.ts` is only an optimistic redirect.
+- Cache Components is on: request-time reads (session, `searchParams`) go inside
+  `<Suspense>`, or the segment sets `export const instant = false` (admin only).

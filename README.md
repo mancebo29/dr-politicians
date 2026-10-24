@@ -39,5 +39,20 @@ server log, or written as JSON files to `MAIL_OUTBOX_DIR` when it is set.
 | `pnpm db:up` / `pnpm db:down`                        | Start / stop local Postgres. Data is kept in the `pgdata` volume.                                                   |
 | `pnpm db:reset`                                      | **Deletes all local dev and test data** (removes the `pgdata` volume) and starts a fresh database                   |
 
-The integration test setup drops and recreates the schema of the `_test`
-database on every run; it never touches the dev database.
+The integration and e2e setups drop and recreate the schema of the `_test` and
+`_e2e` databases on every run; they never touch the dev database. `pnpm e2e`
+starts its own `next dev` on port 3100 with emails written to `.tmp/e2e-mail`,
+so stop any running `pnpm dev` first (Next allows one dev server per project).
+
+## Auth and the first admin
+
+- Sign-in: Google (when `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` are set) or
+  username/email + password. New accounts are signed in right away; confirming
+  the email is required later for commenting.
+- Google OAuth client: add `<BETTER_AUTH_URL>/api/auth/callback/google` as an
+  authorized redirect URI (e.g. `http://localhost:3000/api/auth/callback/google`).
+- Create the first admin by registering normally, then running
+  `pnpm admin:promote <email-or-username>` against that environment's database.
+- `/admin` is open to `admin` and `moderator` roles. Every admin page and server
+  action must call `requireRole()` from `src/lib/session.ts`; `src/proxy.ts`
+  only redirects visitors with no session cookie.
