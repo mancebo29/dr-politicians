@@ -3,11 +3,14 @@
 import Link from "next/link";
 import { type FormEvent, useState } from "react";
 import { authClient } from "@/lib/auth-client";
+import { Turnstile, turnstileEnabled } from "@/components/turnstile";
 import { authErrorMessage } from "@/lib/auth-errors";
 import { Field, FormMessage, SubmitButton } from "./form-parts";
 
 export function SignUpForm() {
   const [pending, setPending] = useState(false);
+  const [captcha, setCaptcha] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [sentTo, setSentTo] = useState<string | null>(null);
 
@@ -24,11 +27,15 @@ export function SignUpForm() {
       email,
       password: String(form.get("password")),
       callbackURL: "/?verificado=1",
+      fetchOptions: captcha ? { headers: { "x-captcha-response": captcha } } : undefined,
     });
 
     setPending(false);
     if (error) {
       setError(authErrorMessage(error));
+      // Turnstile tokens are single use.
+      setCaptcha(null);
+      setAttempt((n) => n + 1);
       return;
     }
     setSentTo(email);
@@ -66,8 +73,11 @@ export function SignUpForm() {
         minLength={10}
         hint="Al menos 10 caracteres."
       />
+      <Turnstile key={attempt} action="registro" onToken={setCaptcha} />
       {error && <FormMessage tone="error">{error}</FormMessage>}
-      <SubmitButton pending={pending}>Crear cuenta</SubmitButton>
+      <SubmitButton pending={pending} disabled={turnstileEnabled && !captcha}>
+        Crear cuenta
+      </SubmitButton>
       <p className="text-sm text-muted">
         ¿Ya tienes cuenta?{" "}
         <Link href="/iniciar-sesion" className="text-accent underline-offset-4 hover:underline">

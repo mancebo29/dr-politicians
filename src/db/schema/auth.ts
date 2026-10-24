@@ -1,6 +1,15 @@
 // Tables owned by Better Auth (core + username + admin plugins). Field names
 // must match what Better Auth expects; see src/lib/auth.ts.
-import { boolean, index, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import {
+  bigint,
+  boolean,
+  index,
+  integer,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core";
 import { id, timestamps } from "./columns";
 
 export const userRoles = ["user", "moderator", "admin"] as const;
@@ -70,3 +79,12 @@ export const verifications = pgTable(
   },
   (t) => [index().on(t.identifier)],
 );
+
+// Better Auth's rate-limit store (`rateLimit.storage: "database"`), so limits
+// on sign-in, sign-up and password reset hold across serverless instances.
+export const rateLimits = pgTable("rate_limits", {
+  id: id(),
+  key: text().notNull().unique(),
+  count: integer().notNull(),
+  lastRequest: bigint({ mode: "number" }).notNull(),
+});

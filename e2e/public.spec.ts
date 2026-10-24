@@ -215,7 +215,12 @@ test.describe("party, province and SEO routes", () => {
     expect(robots).toContain("Disallow: /admin");
     expect(robots).toMatch(/Sitemap: .*\/sitemap\.xml/);
 
-    for (const path of ["/opengraph-image", "/politicos/jose-pena/opengraph-image"]) {
+    // Image routes inside a route group get a hashed name, so follow the
+    // og:image URL the profile page advertises.
+    const profile = await (await request.get("/politicos/jose-pena")).text();
+    const profileImage = profile.match(/<meta property="og:image" content="([^"]+)"/)?.[1];
+    expect(profileImage).toMatch(/\/politicos\/jose-pena\/opengraph-image/);
+    for (const path of ["/opengraph-image", new URL(profileImage!).pathname]) {
       const image = await request.get(path);
       expect(image.status()).toBe(200);
       expect(image.headers()["content-type"]).toBe("image/png");

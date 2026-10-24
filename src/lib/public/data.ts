@@ -4,6 +4,7 @@
 import { cacheLife, cacheTag } from "next/cache";
 import { db } from "@/db";
 import { CACHE_TAGS } from "@/lib/cache-tags";
+import { loadSetting } from "@/lib/site-settings";
 import * as queries from "./politicians";
 
 export async function getPoliticianList(query: queries.ListQuery) {
@@ -53,4 +54,19 @@ export async function getPrerenderSlugs() {
   cacheLife("hours");
   cacheTag(CACHE_TAGS.politicians);
   return queries.listPublishedSlugs(db, 50);
+}
+
+// Saving settings in /admin/configuracion invalidates CACHE_TAGS.settings.
+export async function getContentSettings() {
+  "use cache";
+  cacheLife("days");
+  cacheTag(CACHE_TAGS.settings);
+  return loadSetting(db, "content");
+}
+
+export async function getRegistrationSettings() {
+  "use cache";
+  cacheLife("days");
+  cacheTag(CACHE_TAGS.settings);
+  return loadSetting(db, "registration");
 }

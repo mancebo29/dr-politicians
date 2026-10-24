@@ -3,4 +3,5 @@ export const CACHE_TAGS = {
   politicians: "politicians",
   politician: (slug: string) => `politician:${slug}`,
   ranking: "ranking",
+  settings: "site-settings",
 } as const;

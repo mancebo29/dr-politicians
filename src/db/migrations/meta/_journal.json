@@ -43,6 +43,13 @@
       "when": 1792885666689,
       "tag": "0005_work_record_integrity",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792887691623,
+      "tag": "0006_community_and_rate_limits",
+      "breakpoints": true
     }
   ]
 }

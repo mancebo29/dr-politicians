@@ -13,6 +13,7 @@ import {
   workRecordStatusLabel,
 } from "@/lib/labels";
 import { formatPartialDate } from "@/lib/partial-date";
+import type { ProfileSection } from "@/lib/community/profile-sections";
 import type { ResearchPayload } from "@/lib/research/schema";
 
 type Cite = (ids: string[]) => ReactNode;
@@ -24,10 +25,21 @@ export function periodLabel(start?: string | null, end?: string | null, isCurren
   return to ? `${from} – ${to}` : from;
 }
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
+function Section({
+  title,
+  aside,
+  children,
+}: {
+  title: string;
+  aside?: ReactNode;
+  children: ReactNode;
+}) {
   return (
     <section className="mt-10">
-      <h2 className="border-b border-border pb-2 text-lg font-semibold">{title}</h2>
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 border-b border-border pb-2">
+        <h2 className="text-lg font-semibold">{title}</h2>
+        {aside}
+      </div>
       <div className="mt-4">{children}</div>
     </section>
   );
@@ -58,6 +70,7 @@ export function ProfileView({
   idPrefix = "",
   archiveUrls = {},
   headerAside,
+  sectionAside,
 }: {
   payload: ResearchPayload;
   idPrefix?: string;
@@ -65,6 +78,8 @@ export function ProfileView({
   archiveUrls?: Record<string, string>;
   // Extra header content, e.g. party and current role on the public page.
   headerAside?: ReactNode;
+  // Rendered next to each section heading, e.g. a "report an error" link.
+  sectionAside?: (section: ProfileSection) => ReactNode;
 }) {
   const numbers = new Map(payload.sources.map((s, i) => [s.id, i + 1]));
   const cite: Cite = (ids) => (
@@ -118,14 +133,14 @@ export function ProfileView({
         </div>
       </header>
 
-      <Section title="Resumen">
+      <Section title="Resumen" aside={sectionAside?.("resumen")}>
         <p className="leading-relaxed whitespace-pre-line">
           {p.summary}
           {cite(p.summarySourceIds)}
         </p>
       </Section>
 
-      <Section title="Trayectoria">
+      <Section title="Trayectoria" aside={sectionAside?.("trayectoria")}>
         {payload.positions.length ? (
           <ol className="space-y-3">
             {payload.positions.map((c, i) => (
@@ -147,7 +162,7 @@ export function ProfileView({
         )}
       </Section>
 
-      <Section title="Partidos y alianzas">
+      <Section title="Partidos y alianzas" aside={sectionAside?.("partidos")}>
         {payload.partyMemberships.length || payload.alliances.length ? (
           <ul className="space-y-3">
             {payload.partyMemberships.map((c, i) => (
@@ -177,7 +192,7 @@ export function ProfileView({
         )}
       </Section>
 
-      <Section title="Gestión">
+      <Section title="Gestión" aside={sectionAside?.("gestion")}>
         {payload.workRecord.length ? (
           <ul className="space-y-4">
             {payload.workRecord.map((c, i) => (
@@ -206,7 +221,7 @@ export function ProfileView({
         )}
       </Section>
 
-      <Section title="Leyes e iniciativas">
+      <Section title="Leyes e iniciativas" aside={sectionAside?.("leyes")}>
         {payload.legislation.length ? (
           <ul className="space-y-3">
             {payload.legislation.map((c, i) => (
@@ -229,7 +244,7 @@ export function ProfileView({
         )}
       </Section>
 
-      <Section title="Posturas">
+      <Section title="Posturas" aside={sectionAside?.("posturas")}>
         {stances.size ? (
           <div className="space-y-6">
             {[...stances].map(([topic, items]) => (
@@ -253,7 +268,7 @@ export function ProfileView({
         )}
       </Section>
 
-      <Section title="Declaraciones e influencias">
+      <Section title="Declaraciones e influencias" aside={sectionAside?.("declaraciones")}>
         {otherStatements.length ? (
           <ul className="space-y-4">
             {otherStatements.map((c, i) => (
@@ -271,7 +286,7 @@ export function ProfileView({
         )}
       </Section>
 
-      <Section title="Controversias">
+      <Section title="Controversias" aside={sectionAside?.("controversias")}>
         {payload.controversies.length ? (
           <ul className="space-y-5">
             {payload.controversies.map((c, i) => (
@@ -296,7 +311,7 @@ export function ProfileView({
         )}
       </Section>
 
-      <Section title="Fuentes">
+      <Section title="Fuentes" aside={sectionAside?.("fuentes")}>
         <ol className="space-y-2 text-sm">
           {payload.sources.map((s, i) => (
             <li

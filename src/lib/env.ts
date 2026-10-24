@@ -26,6 +26,11 @@ const schema = z.object({
   // Vercel Cron sends it as `Authorization: Bearer <CRON_SECRET>`. Without it
   // the cron endpoints refuse every request.
   CRON_SECRET: optional,
+  // Cloudflare Turnstile on sign-up, password reset and anonymous feedback
+  // (PLAN §7.3). Without the secret, development skips the check and
+  // production refuses those requests (src/lib/turnstile.ts). The site key is
+  // NEXT_PUBLIC_TURNSTILE_SITE_KEY, read by the browser widget.
+  TURNSTILE_SECRET_KEY: z.string().min(1).optional(),
 });
 
 export type Env = z.infer<typeof schema>;

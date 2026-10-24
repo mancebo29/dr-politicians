@@ -3,11 +3,14 @@
 import Link from "next/link";
 import { type FormEvent, useState } from "react";
 import { authClient } from "@/lib/auth-client";
+import { Turnstile, turnstileEnabled } from "@/components/turnstile";
 import { authErrorMessage } from "@/lib/auth-errors";
 import { Field, FormMessage, SubmitButton } from "./form-parts";
 
 export function ForgotPasswordForm() {
   const [pending, setPending] = useState(false);
+  const [captcha, setCaptcha] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
 
@@ -19,10 +22,14 @@ export function ForgotPasswordForm() {
     const { error } = await authClient.requestPasswordReset({
       email,
       redirectTo: "/restablecer-contrasena",
+      fetchOptions: captcha ? { headers: { "x-captcha-response": captcha } } : undefined,
     });
     setPending(false);
-    if (error) setError(authErrorMessage(error));
-    else setSent(true);
+    if (error) {
+      setError(authErrorMessage(error));
+      setCaptcha(null);
+      setAttempt((n) => n + 1);
+    } else setSent(true);
   }
 
   if (sent) {
@@ -38,8 +45,11 @@ export function ForgotPasswordForm() {
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4">
       <Field label="Correo electrónico" name="email" type="email" autoComplete="email" required />
+      <Turnstile key={attempt} action="recuperar" onToken={setCaptcha} />
       {error && <FormMessage tone="error">{error}</FormMessage>}
-      <SubmitButton pending={pending}>Enviar enlace</SubmitButton>
+      <SubmitButton pending={pending} disabled={turnstileEnabled && !captcha}>
+        Enviar enlace
+      </SubmitButton>
     </form>
   );
 }

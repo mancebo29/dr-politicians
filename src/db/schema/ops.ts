@@ -161,3 +161,15 @@ export const refreshProposals = pgTable(
     check("refresh_proposals_decision", sql`(${t.status} = 'pending') = (${t.decidedAt} is null)`),
   ],
 );
+
+// Fixed-window counters for the app's own rate limits (comments, reports,
+// feedback); see src/lib/rate-limit.ts. Keys never contain a raw IP address.
+export const actionRateLimits = pgTable(
+  "action_rate_limits",
+  {
+    key: text().notNull(),
+    windowStart: timestamp({ withTimezone: true }).notNull(),
+    count: integer().notNull().default(0),
+  },
+  (t) => [primaryKey({ columns: [t.key, t.windowStart] }), index().on(t.windowStart)],
+);

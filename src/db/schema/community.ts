@@ -15,11 +15,12 @@ import {
 import { users } from "./auth";
 import { id, timestamps } from "./columns";
 import { politicians } from "./profiles";
+import { researchJobs } from "./research";
 
 export const commentStatus = pgEnum("comment_status", ["visible", "pending", "hidden", "deleted"]);
 
-// Threads are capped at three levels (depth 0–2); replies to a depth-2
-// comment attach to that comment rather than nesting further.
+// Threads are capped at three levels (depth 0–2); a reply to a depth-2
+// comment becomes its sibling (same parent) rather than nesting further.
 export const MAX_COMMENT_DEPTH = 2;
 
 export const comments = pgTable(
@@ -42,6 +43,7 @@ export const comments = pgTable(
     index().on(t.politicianId, t.createdAt),
     index().on(t.parentId),
     index().on(t.userId),
+    index().on(t.status, t.createdAt),
     check("comments_depth", sql`${t.depth} between 0 and ${sql.raw(String(MAX_COMMENT_DEPTH))}`),
     check("comments_root_depth", sql`(${t.parentId} is null) = (${t.depth} = 0)`),
     check("comments_body_length", sql`char_length(${t.body}) between 1 and 5000`),
@@ -88,6 +90,8 @@ export const feedback = pgTable(
     userId: uuid().references(() => users.id, { onDelete: "set null" }),
     status: feedbackStatus().notNull().default("new"),
     resolutionNote: text(),
+    // Set when a correction was turned into a targeted_correction research job.
+    researchJobId: uuid().references(() => researchJobs.id, { onDelete: "set null" }),
     ...timestamps,
   },
   (t) => [

@@ -22,9 +22,9 @@ export default defineConfig({
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
     command: `pnpm exec next dev --port ${PORT}`,
-    // The home page reads the database. Probe a static page while globalSetup
-    // recreates the E2E schema so readiness checks cannot race migrations.
-    url: `${baseURL}/iniciar-sesion`,
+    // Pages read the database (the footer reads site settings), so probe a
+    // route that does not while globalSetup recreates the E2E schema.
+    url: `${baseURL}/robots.txt`,
     timeout: 120_000,
     reuseExistingServer: false,
     env: {
