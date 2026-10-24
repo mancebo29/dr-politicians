@@ -1,6 +1,6 @@
 # DR Politicians — Project Plan
 
-Status: **approved; Phases 0–2 done (2026-10-24)** · Written 2026-10-24 · Owner: project admin
+Status: **approved; Phases 0–2 done, Phase 3 built with pilot awaiting review (2026-10-24)** · Written 2026-10-24 · Owner: project admin
 
 A public, source-backed collection of profiles of all living current and former politicians of
 the Dominican Republic, researched in chunks with Claude Code and published only
@@ -51,13 +51,13 @@ delivery phases in §11):
 
 Offices (same tiers for both stages):
 
-| Tier               | Offices                                                                                 | Approx. count |
-| ------------------ | --------------------------------------------------------------------------------------- | ------------- |
-| National executive | President, Vice President, ministers, key directors of autonomous bodies                | ~40           |
-| Legislative        | Senators (32: 31 provinces + Distrito Nacional), deputies (190), Parlacen deputies (20) | ~240 per term |
-| Local              | Mayors (alcaldes) of the 158 municipalities, district directors                         | ~160+         |
-| Party leadership   | Presidents/secretaries-general of parties with congressional representation             | ~15           |
-| Candidates         | Presidential and vice-presidential candidates in 2020 and 2024                          | ~20           |
+| Tier               | Offices                                                                                                                                     | Approx. count |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| National executive | President, Vice President, ministers, key directors of autonomous bodies                                                                    | ~40           |
+| Legislative        | Senators (32: 31 provinces + Distrito Nacional), deputies (190; 170 from 2028 under the 2024 constitutional reform), Parlacen deputies (20) | ~240 per term |
+| Local              | Mayors (alcaldes) of the 158 municipalities, district directors                                                                             | ~160+         |
+| Party leadership   | Presidents/secretaries-general of parties with congressional representation                                                                 | ~15           |
+| Candidates         | Presidential and vice-presidential candidates in 2020 and 2024                                                                              | ~20           |
 
 Counts are illustrative and must be confirmed from official sources during seeding.
 For stage 1 (three electoral periods with turnover) expect roughly **600–900 unique
