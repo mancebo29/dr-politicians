@@ -1,21 +1,25 @@
 import { sql } from "drizzle-orm";
 import { check, index, pgEnum, pgTable, text, uniqueIndex, uuid } from "drizzle-orm/pg-core";
-import { id, partialDate, timestamps } from "./columns";
+import { id, partialDate, partialDateText, partialDateTextCheck, timestamps } from "./columns";
 
 export const sourceTier = pgEnum("source_tier", ["official", "major_press", "other"]);
 
-export const sources = pgTable("sources", {
-  id: id(),
-  url: text().notNull().unique(),
-  title: text().notNull(),
-  publisher: text().notNull(),
-  publishedOn: partialDate(),
-  accessedOn: partialDate().notNull(),
-  archiveUrl: text(),
-  tier: sourceTier().notNull(),
-  language: text().notNull().default("es"),
-  ...timestamps,
-});
+export const sources = pgTable(
+  "sources",
+  {
+    id: id(),
+    url: text().notNull().unique(),
+    title: text().notNull(),
+    publisher: text().notNull(),
+    publishedOn: partialDateText(),
+    accessedOn: partialDate().notNull(),
+    archiveUrl: text(),
+    tier: sourceTier().notNull(),
+    language: text().notNull().default("es"),
+    ...timestamps,
+  },
+  (t) => [partialDateTextCheck("sources_published_on_format", t.publishedOn)],
+);
 
 // Every published claim links to at least one source. Claims live in several
 // tables, so the link is polymorphic; the `unsourced_claims` view and the

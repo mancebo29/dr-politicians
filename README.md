@@ -56,3 +56,22 @@ so stop any running `pnpm dev` first (Next allows one dev server per project).
 - `/admin` is open to `admin` and `moderator` roles. Every admin page and server
   action must call `requireRole()` from `src/lib/session.ts`; `src/proxy.ts`
   only redirects visitors with no session cookie.
+
+## Research pipeline
+
+Profiles are researched with Claude Code and published only after admin review
+(PLAN §6). The protocol lives in `.claude/skills/research-politician/SKILL.md`.
+
+1. An admin queues jobs in `/admin/investigacion` and creates a research token
+   in `/admin/investigacion/tokens` (or `pnpm research:token <name>` locally).
+2. Put the token in `.env.local` as `RESEARCH_TOKEN` (and `RESEARCH_API_URL` if
+   the app isn't on `http://localhost:3000`), then in Claude Code ask it to
+   research the next profile. It runs `pnpm research:claim`, writes
+   `research/out/<jobId>.json`, checks it with `pnpm research:validate` and
+   sends it with `pnpm research:submit <jobId> <file>`.
+3. The admin reviews the diff, validation report and preview, then approves
+   selected sections, requests changes (the note goes back with the next claim),
+   rejects, or edits the JSON (saved as a new submission version).
+
+Publishing runs in one transaction, writes a profile revision and refuses any
+profile that would have a claim without a source.

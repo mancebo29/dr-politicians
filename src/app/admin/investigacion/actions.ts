@@ -1,0 +1,157 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { db } from "@/db";
+import { auditLog, researchJobs } from "@/db/schema";
+import { PublishError, publishSections, publishSubmission } from "@/lib/research/publish";
+import {
+  createJob,
+  decideSubmission,
+  QueueError,
+  reviseSubmission,
+  updateJobStatus,
+} from "@/lib/research/queue";
+import { checkSourcesOverHttp } from "@/lib/research/source-check";
+import { createResearchToken, revokeResearchToken } from "@/lib/research/tokens";
+import { requireRole } from "@/lib/session";
+
+export type ActionState = { error?: string; issues?: string[]; token?: string } | null;
+
+const ADMIN = ["admin"] as const;
+const kinds = researchJobs.kind.enumValues;
+
+function field(form: FormData, key: string) {
+  const value = form.get(key);
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function failure(error: unknown): ActionState {
+  if (error instanceof QueueError) return { error: error.message, issues: error.issues };
+  if (error instanceof PublishError) return { error: error.message };
+  throw error;
+}
+
+export async function createJobAction(_: ActionState, form: FormData): Promise<ActionState> {
+  const { user } = await requireRole(ADMIN, "/admin/investigacion");
+  const kind = field(form, "kind") as (typeof kinds)[number];
+  if (!kinds.includes(kind)) return { error: "Tipo de investigación no válido." };
+  const politicianId = field(form, "politicianId") || null;
+  const requestedName = field(form, "requestedName") || null;
+  if (kind === "new_profile" && !requestedName) return { error: "Indica el nombre de la persona." };
+  if (kind !== "new_profile" && !politicianId) return { error: "Elige el perfil a actualizar." };
+  await createJob(db, {
+    kind,
+    politicianId,
+    requestedName,
+    instructions: field(form, "instructions") || null,
+    priority: Number(field(form, "priority") || 0),
+    wave: field(form, "wave") ? Number(field(form, "wave")) : null,
+    createdByUserId: user.id,
+  });
+  revalidatePath("/admin/investigacion");
+  return null;
+}
+
+export async function jobStatusAction(jobId: string, action: "cancel" | "release") {
+  const { user } = await requireRole(ADMIN, "/admin/investigacion");
+  await updateJobStatus(db, { jobId, actorUserId: user.id, action });
+  revalidatePath("/admin/investigacion");
+}
+
+export async function publishAction(
+  submissionId: string,
+  _: ActionState,
+  form: FormData,
+): Promise<ActionState> {
+  const { user } = await requireRole(ADMIN, "/admin/investigacion");
+  const sections = publishSections.filter((s) => form.get(`section:${s}`) === "on");
+  let slug: string;
+  try {
+    ({ slug } = await publishSubmission(db, {
+      submissionId,
+      reviewerUserId: user.id,
+      sections,
+      note: field(form, "note"),
+    }));
+  } catch (error) {
+    return failure(error);
+  }
+  revalidatePath("/admin", "layout");
+  redirect(`/admin/perfiles/${slug}`);
+}
+
+export async function decideAction(
+  submissionId: string,
+  decision: "needs_changes" | "rejected",
+  _: ActionState,
+  form: FormData,
+): Promise<ActionState> {
+  const { user } = await requireRole(ADMIN, "/admin/investigacion");
+  try {
+    await decideSubmission(db, {
+      submissionId,
+      reviewerUserId: user.id,
+      decision,
+      note: field(form, "note"),
+    });
+  } catch (error) {
+    return failure(error);
+  }
+  revalidatePath("/admin/investigacion", "layout");
+  return null;
+}
+
+export async function reviseAction(
+  submissionId: string,
+  _: ActionState,
+  form: FormData,
+): Promise<ActionState> {
+  const { user } = await requireRole(ADMIN, "/admin/investigacion");
+  let payload: unknown;
+  try {
+    payload = JSON.parse(field(form, "payload"));
+  } catch {
+    return { error: "El JSON no es válido." };
+  }
+  try {
+    await reviseSubmission(db, {
+      submissionId,
+      reviewerUserId: user.id,
+      payload,
+      checkSources: checkSourcesOverHttp,
+    });
+  } catch (error) {
+    return failure(error);
+  }
+  revalidatePath("/admin/investigacion", "layout");
+  return null;
+}
+
+export async function createTokenAction(_: ActionState, form: FormData): Promise<ActionState> {
+  const { user } = await requireRole(ADMIN, "/admin/investigacion/tokens");
+  const name = field(form, "name");
+  if (!name) return { error: "Ponle un nombre al token." };
+  const { id, token } = await createResearchToken(db, { name, createdByUserId: user.id });
+  await db.insert(auditLog).values({
+    actorUserId: user.id,
+    action: "research_token.create",
+    entity: "research_token",
+    entityId: id,
+    after: { name },
+  });
+  revalidatePath("/admin/investigacion/tokens");
+  return { token };
+}
+
+export async function revokeTokenAction(tokenId: string) {
+  const { user } = await requireRole(ADMIN, "/admin/investigacion/tokens");
+  await revokeResearchToken(db, tokenId);
+  await db.insert(auditLog).values({
+    actorUserId: user.id,
+    action: "research_token.revoke",
+    entity: "research_token",
+    entityId: tokenId,
+  });
+  revalidatePath("/admin/investigacion/tokens");
+}

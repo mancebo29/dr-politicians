@@ -21,6 +21,8 @@ Full command list: README.md.
 - UI copy and profile content are in Spanish; code identifiers and docs in English.
 - Never publish profile data without admin review; research output is a draft.
 - Every profile claim must link to at least one source (see PLAN §6.3).
+- Researching profiles: follow `.claude/skills/research-politician/SKILL.md`; the payload
+  contract is `src/lib/research/schema.ts`.
 - Secrets go in `.env.local` / Vercel env, never in the repo.
 - Every admin page and server action calls `requireRole()` (`src/lib/session.ts`);
   `src/proxy.ts` is only an optimistic redirect.

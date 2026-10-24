@@ -20,7 +20,12 @@
     "db:migrate": "tsx --env-file-if-exists=.env.local scripts/db-migrate.ts",
     "db:seed": "tsx --env-file-if-exists=.env.local scripts/db-seed.ts",
     "db:studio": "drizzle-kit studio",
-    "admin:promote": "tsx --env-file-if-exists=.env.local scripts/admin-promote.ts"
+    "admin:promote": "tsx --env-file-if-exists=.env.local scripts/admin-promote.ts",
+    "research:claim": "tsx --env-file-if-exists=.env.local scripts/research.ts claim",
+    "research:validate": "tsx --env-file-if-exists=.env.local scripts/research.ts validate",
+    "research:submit": "tsx --env-file-if-exists=.env.local scripts/research.ts submit",
+    "research:heartbeat": "tsx --env-file-if-exists=.env.local scripts/research.ts heartbeat",
+    "research:token": "tsx --env-file-if-exists=.env.local scripts/research-token.ts"
   },
   "dependencies": {
     "better-auth": "^1.7.12",

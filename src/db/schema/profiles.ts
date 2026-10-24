@@ -11,7 +11,14 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
-import { datePrecision, id, partialDate, timestamps } from "./columns";
+import {
+  datePrecision,
+  id,
+  partialDate,
+  partialDateText,
+  partialDateTextCheck,
+  timestamps,
+} from "./columns";
 import { institutions, municipalities, parties, provinces } from "./reference";
 import { sources } from "./sources";
 
@@ -193,8 +200,8 @@ export const legislation = pgTable(
     number: text(),
     kind: legislationKind().notNull(),
     status: legislationStatus().notNull().default("unknown"),
-    introducedOn: partialDate(),
-    promulgatedOn: partialDate(),
+    introducedOn: partialDateText(),
+    promulgatedOn: partialDateText(),
     officialUrl: text(),
     ...timestamps,
   },
@@ -202,6 +209,8 @@ export const legislation = pgTable(
     uniqueIndex()
       .on(t.kind, t.number)
       .where(sql`${t.number} is not null`),
+    partialDateTextCheck("legislation_introduced_on_format", t.introducedOn),
+    partialDateTextCheck("legislation_promulgated_on_format", t.promulgatedOn),
   ],
 );
 

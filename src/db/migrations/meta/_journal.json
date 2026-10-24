@@ -15,6 +15,13 @@
       "when": 1792867720711,
       "tag": "0001_integrity_and_search",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792869558913,
+      "tag": "0002_partial_date_text",
+      "breakpoints": true
     }
   ]
 }

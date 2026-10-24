@@ -47,3 +47,7 @@ next-env.d.ts
 # playwright
 /test-results
 /playwright-report
+
+# research session working files (submissions live in the database)
+/research/briefs
+/research/out

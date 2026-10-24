@@ -13,7 +13,11 @@ export const metadata: Metadata = {
 };
 
 // Sections arrive in later milestones (PLAN §8); `roles` decides who sees each link.
-const sections = [{ href: "/admin", label: "Resumen", roles: STAFF_ROLES }] as const;
+const sections = [
+  { href: "/admin", label: "Resumen", roles: STAFF_ROLES },
+  { href: "/admin/investigacion", label: "Investigación", roles: ["admin"] },
+  { href: "/admin/perfiles", label: "Perfiles", roles: ["admin"] },
+] as const;
 
 export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
   const { user } = await requireRole(STAFF_ROLES);

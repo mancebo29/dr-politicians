@@ -1,7 +1,8 @@
 import { rm } from "node:fs/promises";
 import postgres from "postgres";
 import { runMigrations } from "@/db/migrate";
-import { e2eDatabaseUrl, MAIL_OUTBOX_DIR } from "./support";
+import { seedReferenceData } from "@/db/seed/reference";
+import { e2eDatabaseUrl, e2eDb, MAIL_OUTBOX_DIR } from "./support";
 
 export default async function globalSetup() {
   const url = e2eDatabaseUrl();
@@ -14,5 +15,11 @@ export default async function globalSetup() {
     await client.end();
   }
   await runMigrations(url);
+  const db = e2eDb();
+  try {
+    await seedReferenceData(db);
+  } finally {
+    await db.$client.end();
+  }
   await rm(MAIL_OUTBOX_DIR, { recursive: true, force: true });
 }
