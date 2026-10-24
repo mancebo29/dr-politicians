@@ -70,14 +70,15 @@ export type PublishInput = {
   reviewerUserId: string;
   // Sections not listed keep the currently published data (PLAN §8.1 per-section accept).
   sections: readonly PublishSection[];
-  note: string;
+  // Optional; revisions without one read "Aprobado sin nota" in the history.
+  note?: string | null;
 };
 
 // Applies an approved research submission to the live profile in one
 // transaction: either the whole publish lands, with its revision and audit
 // entries, or nothing changes.
 export async function publishSubmission(db: Database, input: PublishInput) {
-  if (!input.note.trim()) throw new PublishError("A revision note is required");
+  const note = input.note?.trim() || null;
   const include = new Set(input.sections);
 
   return db.transaction(async (tx) => {
@@ -389,11 +390,11 @@ export async function publishSubmission(db: Database, input: PublishInput) {
       origin: "research_submission",
       submissionId: submission.id,
       actorUserId: input.reviewerUserId,
-      note: input.note.trim(),
+      note: note ?? "Aprobado sin nota",
     });
     await tx
       .update(researchSubmissions)
-      .set({ reviewerUserId: input.reviewerUserId, reviewNotes: input.note.trim(), decidedAt: now })
+      .set({ reviewerUserId: input.reviewerUserId, reviewNotes: note, decidedAt: now })
       .where(eq(researchSubmissions.id, submission.id));
     await tx
       .update(researchJobs)

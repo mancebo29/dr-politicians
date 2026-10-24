@@ -289,6 +289,21 @@ describe("publishSubmission", () => {
     expect(await db.$count(claimSources)).toBe(0);
   });
 
+  it("publishes without a note and records a default revision note", async () => {
+    const { submissionId } = await submitNew();
+    const { politicianId } = await publishSubmission(db, {
+      submissionId,
+      reviewerUserId: reviewerId,
+      sections: publishSections,
+      note: "  ",
+    });
+    const [revision] = await db
+      .select()
+      .from(profileRevisions)
+      .where(eq(profileRevisions.politicianId, politicianId));
+    expect(revision.note).toBe("Aprobado sin nota");
+  });
+
   it("cannot publish the same submission twice", async () => {
     const { submissionId } = await submitNew();
     const input = {

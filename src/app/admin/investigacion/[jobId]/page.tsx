@@ -256,10 +256,9 @@ function Review({
             </fieldset>
             <textarea
               name="note"
-              required
               rows={2}
               className={inputClass}
-              placeholder="Nota de la revisión (visible en el historial)"
+              placeholder="Nota de la revisión (opcional, visible en el historial)"
             />
           </ActionForm>
           <ActionForm

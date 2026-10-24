@@ -48,7 +48,7 @@ test("queue, claim, submit, review and publish a research job", async ({ page })
   await page.goto(`/admin/investigacion/${brief.job.id}`);
   await expect(page.getByText("Pendiente de revisión")).toBeVisible();
   await expect(page.getByText("+ Senador — Senado de la República, Santiago")).toBeVisible();
-  await page.getByPlaceholder("Nota de la revisión").fill("Perfil de prueba revisado");
+  await page.getByPlaceholder("Nota de la revisión (opcional").fill("Perfil de prueba revisado");
   await page.getByRole("button", { name: "Aprobar y publicar" }).click();
 
   await expect(page).toHaveURL(/\/admin\/perfiles\//);
