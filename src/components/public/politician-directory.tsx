@@ -178,6 +178,11 @@ function PoliticianRow({ item, showRank }: { item: PoliticianListItem; showRank:
                 {item.rank}
               </span>
               <RankChange delta={item.rankDelta} />
+              {item.noRecentData && (
+                <span className="mt-0.5 text-[0.625rem] leading-tight text-muted">
+                  sin datos recientes
+                </span>
+              )}
             </>
           ) : (
             <span className="text-muted" aria-label="Sin puesto esta semana">

@@ -7,6 +7,7 @@ const base = {
   GOOGLE_CLIENT_ID: "",
   GOOGLE_CLIENT_SECRET: "",
   RESEND_API_KEY: "",
+  CRON_SECRET: "",
   NEXT_PHASE: "",
 };
 
@@ -29,7 +30,9 @@ describe("env", () => {
 
   it("requires provider keys when the production server runs", async () => {
     const env = await loadEnv({ NODE_ENV: "production" });
-    expect(() => env()).toThrow(/GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, RESEND_API_KEY/);
+    expect(() => env()).toThrow(
+      /GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, RESEND_API_KEY, CRON_SECRET/,
+    );
   });
 
   it("does not require provider keys during next build", async () => {

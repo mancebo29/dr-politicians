@@ -43,7 +43,13 @@ export async function seedPublicSiteData(db: Database) {
       rank: 1,
       rankDelta: 2,
     },
-    { weekStart: "2026-10-19", politicianId: ids["maria-nunez"], score: 5, rank: 2 },
+    {
+      weekStart: "2026-10-19",
+      politicianId: ids["maria-nunez"],
+      score: 5,
+      rank: 2,
+      noRecentData: true,
+    },
     { weekStart: "2026-10-19", politicianId: ids["jose-pena"], score: 3, rank: 3, rankDelta: -2 },
   ]);
 }

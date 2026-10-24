@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { ProfileView } from "@/components/profile/profile-view";
+import { PageViewBeacon } from "@/components/popularity/page-view-beacon";
 import { PartyBadge } from "@/components/public/party-badge";
 import { formatPartialDate } from "@/lib/partial-date";
 import { getPrerenderSlugs, getPublicProfile } from "@/lib/public/data";
@@ -87,6 +88,7 @@ async function Profile({ params }: Pick<PageProps<"/politicos/[slug]">, "params"
 
   return (
     <>
+      <PageViewBeacon slug={slug} />
       <ProfileView
         payload={payload}
         archiveUrls={profile.archiveUrls}

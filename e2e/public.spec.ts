@@ -32,6 +32,7 @@ test.describe("public list", () => {
     await expect(listNames(page).nth(2)).toHaveText("José Peña");
     await expect(listNames(page).nth(3)).toHaveText("Ana Prueba");
     await expect(page.getByText("subió 2 puestos")).toBeAttached();
+    await expect(page.getByText("sin datos recientes")).toBeVisible();
     await expect(page.getByRole("link", { name: "Rafael Difunto" })).toHaveCount(0);
     await expect(page.getByRole("link", { name: "José Borrador Oculto" })).toHaveCount(0);
   });

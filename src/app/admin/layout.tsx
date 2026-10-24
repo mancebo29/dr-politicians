@@ -17,6 +17,7 @@ const sections = [
   { href: "/admin", label: "Resumen", roles: STAFF_ROLES },
   { href: "/admin/investigacion", label: "Investigación", roles: ["admin"] },
   { href: "/admin/perfiles", label: "Perfiles", roles: ["admin"] },
+  { href: "/admin/clasificacion", label: "Clasificación", roles: ["admin"] },
 ] as const;
 
 export default async function AdminLayout({ children }: LayoutProps<"/admin">) {

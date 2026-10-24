@@ -19,6 +19,9 @@ const schema = z.object({
   RESEND_API_KEY: requiredInProduction,
   EMAIL_FROM: z.string().min(1).default("Políticos RD <no-reply@localhost>"),
   MAIL_OUTBOX_DIR: z.string().min(1).optional(),
+  // Vercel Cron sends it as `Authorization: Bearer <CRON_SECRET>`. Without it
+  // the cron endpoints refuse every request.
+  CRON_SECRET: requiredInProduction,
 });
 
 export type Env = z.infer<typeof schema>;

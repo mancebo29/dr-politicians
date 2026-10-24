@@ -22,6 +22,7 @@ export type PoliticianListItem = {
   role: { title: string; isCurrent: boolean; province: string | null } | null;
   rank: number | null;
   rankDelta: number | null;
+  noRecentData: boolean;
 };
 
 export type PoliticianList = {
@@ -109,6 +110,7 @@ type ListRow = {
   role_province: string | null;
   rank: number | null;
   rank_delta: number | null;
+  no_recent_data: boolean | null;
 };
 
 export async function listPublishedPoliticians(
@@ -150,7 +152,8 @@ export async function listPublishedPoliticians(
       role.is_current as role_current,
       role.province as role_province,
       s.rank,
-      s.rank_delta
+      s.rank_delta,
+      s.no_recent_data
     from ${politicians}
     left join ${parties} on ${parties.id} = ${politicians.currentPartyId}
     left join popularity_snapshots s
@@ -191,6 +194,7 @@ export async function listPublishedPoliticians(
         : null,
       rank: r.rank,
       rankDelta: r.rank_delta,
+      noRecentData: Boolean(r.no_recent_data),
     })),
     total,
     page,

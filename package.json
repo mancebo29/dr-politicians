@@ -26,7 +26,8 @@
     "research:validate": "tsx --env-file-if-exists=.env.local scripts/research.ts validate",
     "research:submit": "tsx --env-file-if-exists=.env.local scripts/research.ts submit",
     "research:heartbeat": "tsx --env-file-if-exists=.env.local scripts/research.ts heartbeat",
-    "research:token": "tsx --env-file-if-exists=.env.local scripts/research-token.ts"
+    "research:token": "tsx --env-file-if-exists=.env.local scripts/research-token.ts",
+    "spike:ranking": "tsx scripts/spike-ranking-sources.ts"
   },
   "dependencies": {
     "better-auth": "^1.7.12",
