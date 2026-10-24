@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { Resend } from "resend";
-import { env } from "@/lib/env";
+import { env, isProductionRuntime } from "@/lib/env";
 
 export type Email = { to: string; subject: string; text: string; html: string };
 
@@ -17,6 +17,11 @@ export async function sendEmail(email: Email): Promise<void> {
     const { error } = await resend.emails.send({ from: EMAIL_FROM, ...email });
     if (error) throw new Error(`Resend failed to send "${email.subject}": ${error.message}`);
     return;
+  }
+
+  // The dev transports would put verification and reset links in production logs.
+  if (isProductionRuntime) {
+    throw new Error(`RESEND_API_KEY is not set; cannot send "${email.subject}"`);
   }
 
   if (MAIL_OUTBOX_DIR) {

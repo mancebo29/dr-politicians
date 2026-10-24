@@ -28,11 +28,19 @@ describe("env", () => {
     expect(env().GOOGLE_CLIENT_ID).toBeUndefined();
   });
 
-  it("requires provider keys when the production server runs", async () => {
+  it("requires Google keys when the production server runs", async () => {
     const env = await loadEnv({ NODE_ENV: "production" });
-    expect(() => env()).toThrow(
-      /GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, RESEND_API_KEY, CRON_SECRET/,
-    );
+    expect(() => env()).toThrow(/: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET$/);
+  });
+
+  it("does not require Resend or cron keys when the production server runs", async () => {
+    const env = await loadEnv({
+      NODE_ENV: "production",
+      GOOGLE_CLIENT_ID: "id",
+      GOOGLE_CLIENT_SECRET: "secret",
+    });
+    expect(env().RESEND_API_KEY).toBeUndefined();
+    expect(env().CRON_SECRET).toBeUndefined();
   });
 
   it("does not require provider keys during next build", async () => {

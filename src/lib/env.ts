@@ -2,13 +2,16 @@ import { z } from "zod";
 
 // `next build` runs with NODE_ENV=production but only needs to compile, so
 // provider credentials are enforced when the production server starts instead.
-const isProductionRuntime =
+export const isProductionRuntime =
   process.env.NODE_ENV === "production" && process.env.NEXT_PHASE !== "phase-production-build";
 
-// Google and Resend are optional outside production so the app, tests, and CI
-// run without third-party credentials: Google sign-in is hidden and emails go
-// to the dev mail transport (see src/lib/email.ts).
+// Google is optional outside production so the app, tests, and CI run without
+// third-party credentials: Google sign-in is hidden.
 const requiredInProduction = isProductionRuntime ? z.string().min(1) : z.string().min(1).optional();
+
+// env() runs on every request, public pages included, so a key only one feature
+// needs must not fail it. Those features enforce their own key when used.
+const optional = z.string().min(1).optional();
 
 const schema = z.object({
   DATABASE_URL: z.url(),
@@ -16,12 +19,13 @@ const schema = z.object({
   BETTER_AUTH_URL: z.url(),
   GOOGLE_CLIENT_ID: requiredInProduction,
   GOOGLE_CLIENT_SECRET: requiredInProduction,
-  RESEND_API_KEY: requiredInProduction,
+  // Required in production by src/lib/email.ts when it sends.
+  RESEND_API_KEY: optional,
   EMAIL_FROM: z.string().min(1).default("Políticos RD <no-reply@localhost>"),
   MAIL_OUTBOX_DIR: z.string().min(1).optional(),
   // Vercel Cron sends it as `Authorization: Bearer <CRON_SECRET>`. Without it
   // the cron endpoints refuse every request.
-  CRON_SECRET: requiredInProduction,
+  CRON_SECRET: optional,
 });
 
 export type Env = z.infer<typeof schema>;
