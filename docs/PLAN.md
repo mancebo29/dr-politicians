@@ -190,7 +190,7 @@ Admin queues job ──▶ research_jobs(queued)
 - `research:claim` returns a brief: job kind, admin instructions, current published profile (for refresh/correction jobs), and known sources to avoid re-fetching.
 - Leases expire; an expired claimed job returns to `queued` and `attempts` increments. Submitting against an expired or foreign lease is rejected.
 - Submissions are idempotent per (job, payload hash).
-- Batch work: a session can process a wave by claiming jobs one at a time (`/loop` or a headless `claude -p` script). Throughput and cost per profile are measured in the pilot (Phase 3) before scaling.
+- Batch work: `pnpm research:run` works the queue unattended on the admin's machine. It claims each job, runs one fresh headless `claude -p` session for it with a fixed tool allowlist (web search/fetch, read, write under `research/out`, `research:validate`/`research:submit`), keeps the lease alive with heartbeats, and releases a job its session did not submit (`failed` after 3 attempts). It stops when the queue is empty or at a job, time or consecutive-failure limit, and logs each session with its reported cost and duration under `research/logs/`. Nothing is published without review.
 
 ### 6.2 Research contract (summary; `src/lib/research/schema.ts` is the authority once written)
 
@@ -315,6 +315,8 @@ Illustrative shape:
 | 5         | Remaining mayors, former officials since 2016, candidates                                                                                                                       | rest of stage 1  |
 | 6+        | Scope stage 2: living office-holders from before 2016, one electoral period per wave, newest first; within a period, national executive and senators before deputies and mayors | sized per period |
 
+Rosters are discovered by AI, not typed in. `src/lib/research/waves.ts` splits these waves into segments small enough for one session (e.g. wave 5 into remaining mayors, former ministers, former legislators per period). A `roster_discovery` job asks a session (`.claude/skills/discover-roster`) to list everyone matching a segment from official sources, each with a source. The admin approves the roster with one click after unticking anyone wrong; approval queues a `new_profile` job per selected person (with the office and identity hints as instructions, skipping people already profiled or queued) and queues discovery for the next segment, so waves advance with one approval each. Discovery jobs outrank profile jobs, so the next roster is ready for review while the current wave is researched.
+
 Before the first weekly ranking exists, wave order is set manually. Afterwards, refresh jobs are queued automatically for the top-N ranked politicians whose profile is older than a configurable age (default 90 days) — admin approves the batch.
 
 ## 7. Public site
@@ -362,7 +364,8 @@ Roles: **admin** (everything) and **moderator** (comments, reports, feedback tri
 
 ### 8.1 Research and profiles
 
-- **Queue**: list jobs by status/wave/priority; add a job by name (new person) or for an existing profile (refresh / targeted correction with instructions); bulk-queue a wave; reorder priority; cancel; release stuck leases.
+- **Queue**: list jobs by status/wave/priority; start AI roster discovery for a wave segment; add a job by name (new person) or for an existing profile (refresh / targeted correction with instructions); bulk-queue a pasted list; reorder priority; cancel; release stuck leases.
+- **Roster review** (discovery jobs): the discovered people with office, province, party, notes and source links; people already profiled or queued are flagged and unticked; approve the selection, request changes or reject.
 - **Review**: side-by-side diff of submission vs published profile, per-section accept/reject, inline edits, source preview (link + archived link + excerpt), validation warnings, approve & publish / request changes (note goes back into the job brief) / reject.
 - **Profiles**: list and edit any published profile directly (each save creates a revision with a required note), manage photo, archive/unpublish, view revision history and roll back.
 - **Reference data**: parties, provinces, institutions, and mapping of unknown values from submissions.

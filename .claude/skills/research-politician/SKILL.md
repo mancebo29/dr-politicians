@@ -19,8 +19,9 @@ before your first submission in a session. PLAN.md §6 explains the pipeline.
 
 ## Workflow
 
-1. `pnpm research:claim` → saves the brief to `research/briefs/<jobId>.json`.
-   Read it fully: job kind, admin `instructions`, `reviewNotes` (fix every point
+1. `pnpm research:claim` → saves the brief to `research/briefs/<jobId>.json`
+   (when `pnpm research:run` started this session, the job is already claimed
+   and its lease kept alive; skip claiming and heartbeats). Read it fully: job kind, admin `instructions` (for wave jobs: the office and identity hints found by roster discovery), `reviewNotes` (fix every point
    if present), `currentProfile` (for refresh/correction jobs), and the known
    `references` (party acronyms, province names).
 2. Research (below). The lease lasts 2 hours; run

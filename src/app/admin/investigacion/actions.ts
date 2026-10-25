@@ -7,6 +7,8 @@ import { auditLog, researchJobs } from "@/db/schema";
 import { invalidatePublicProfile } from "@/lib/public/invalidate";
 import { PublishError, publishSections, publishSubmission } from "@/lib/research/publish";
 import {
+  approveRoster,
+  createDiscoveryJob,
   createJob,
   createJobs,
   decideSubmission,
@@ -28,7 +30,8 @@ export type ActionState = {
 
 const ADMIN = ["admin"] as const;
 const MAX_BULK_JOBS = 300;
-const kinds = researchJobs.kind.enumValues;
+// Discovery jobs are started per wave segment (startDiscoveryAction).
+const kinds = researchJobs.kind.enumValues.filter((k) => k !== "roster_discovery");
 
 function field(form: FormData, key: string) {
   const value = form.get(key);
@@ -90,6 +93,41 @@ export async function createJobsAction(_: ActionState, form: FormData): Promise<
     notice: `${created.length} en cola${skipped.length ? `; ${skipped.length} omitidas:` : "."}`,
     noticeItems: skipped.map((s) => `${s.name}: ${s.reason}`),
   };
+}
+
+export async function startDiscoveryAction(_: ActionState, form: FormData): Promise<ActionState> {
+  const { user } = await requireRole(ADMIN, "/admin/investigacion");
+  try {
+    await createDiscoveryJob(db, { segmentKey: field(form, "segment"), createdByUserId: user.id });
+  } catch (error) {
+    return failure(error);
+  }
+  revalidatePath("/admin/investigacion");
+  return { notice: "Descubrimiento en cola. El investigador automático lo tomará primero." };
+}
+
+// Checkboxes are named "person:<index in the roster>".
+export async function approveRosterAction(
+  submissionId: string,
+  _: ActionState,
+  form: FormData,
+): Promise<ActionState> {
+  const { user } = await requireRole(ADMIN, "/admin/investigacion");
+  const selected = [...form.keys()]
+    .filter((key) => key.startsWith("person:"))
+    .map((key) => Number(key.slice("person:".length)));
+  try {
+    await approveRoster(db, {
+      submissionId,
+      reviewerUserId: user.id,
+      selected,
+      note: field(form, "note"),
+    });
+  } catch (error) {
+    return failure(error);
+  }
+  revalidatePath("/admin", "layout");
+  redirect("/admin/investigacion");
 }
 
 export async function jobStatusAction(jobId: string, action: "cancel" | "release") {

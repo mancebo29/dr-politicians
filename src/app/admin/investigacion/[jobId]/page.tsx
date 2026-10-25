@@ -19,11 +19,18 @@ import { jobKindLabel, jobStatusLabel } from "@/lib/labels";
 import { loadProfile } from "@/lib/profiles/load";
 import { diffPayloads } from "@/lib/research/diff";
 import { publishSections } from "@/lib/research/publish";
-import type { ValidationReport } from "@/lib/research/queue";
+import {
+  findExisting,
+  type RosterValidationReport,
+  skipReasonLabel,
+  type ValidationReport,
+} from "@/lib/research/queue";
+import { rosterPayloadSchema } from "@/lib/research/roster";
 import { claimSections, researchPayloadSchema } from "@/lib/research/schema";
 import { claimSummary, sectionLabel } from "@/lib/research/summary";
+import { nextWaveSegment } from "@/lib/research/waves";
 import { requireRole } from "@/lib/session";
-import { decideAction, publishAction, reviseAction } from "../actions";
+import { approveRosterAction, decideAction, publishAction, reviseAction } from "../actions";
 
 export const metadata: Metadata = { title: "Revisión" };
 export const instant = false;
@@ -71,7 +78,9 @@ export default async function ReviewPage({ params }: PageProps<"/admin/investiga
         {job.instructions && <> · Instrucciones: {job.instructions}</>}
       </p>
 
-      {pending ? (
+      {pending && job.kind === "roster_discovery" ? (
+        <RosterReview key={pending.id} submission={pending} segmentKey={job.rosterSegment} />
+      ) : pending ? (
         <Review
           key={pending.id}
           submission={pending}
@@ -261,32 +270,7 @@ function Review({
               placeholder="Nota de la revisión (opcional, visible en el historial)"
             />
           </ActionForm>
-          <ActionForm
-            action={decideAction.bind(null, submission.id, "needs_changes")}
-            submitLabel="Solicitar cambios"
-            submitClassName={secondaryButtonClass}
-          >
-            <textarea
-              name="note"
-              required
-              rows={5}
-              className={inputClass}
-              placeholder="Qué debe corregir la investigación (se envía con el próximo reclamo)"
-            />
-          </ActionForm>
-          <ActionForm
-            action={decideAction.bind(null, submission.id, "rejected")}
-            submitLabel="Rechazar"
-            submitClassName={secondaryButtonClass}
-          >
-            <textarea
-              name="note"
-              required
-              rows={5}
-              className={inputClass}
-              placeholder="Motivo del rechazo"
-            />
-          </ActionForm>
+          <DecisionForms submissionId={submission.id} />
         </div>
       </Panel>
 
@@ -311,6 +295,188 @@ function Review({
           />
         </div>
       </details>
+    </>
+  );
+}
+
+function DecisionForms({ submissionId }: { submissionId: string }) {
+  return (
+    <>
+      <ActionForm
+        action={decideAction.bind(null, submissionId, "needs_changes")}
+        submitLabel="Solicitar cambios"
+        submitClassName={secondaryButtonClass}
+      >
+        <textarea
+          name="note"
+          required
+          rows={5}
+          className={inputClass}
+          placeholder="Qué debe corregir la investigación (se envía con el próximo reclamo)"
+        />
+      </ActionForm>
+      <ActionForm
+        action={decideAction.bind(null, submissionId, "rejected")}
+        submitLabel="Rechazar"
+        submitClassName={secondaryButtonClass}
+      >
+        <textarea
+          name="note"
+          required
+          rows={5}
+          className={inputClass}
+          placeholder="Motivo del rechazo"
+        />
+      </ActionForm>
+    </>
+  );
+}
+
+async function RosterReview({
+  submission,
+  segmentKey,
+}: {
+  submission: typeof researchSubmissions.$inferSelect;
+  segmentKey: string | null;
+}) {
+  const parsed = rosterPayloadSchema.safeParse(submission.payload);
+  if (!parsed.success) {
+    return (
+      <Panel title="Entrega">
+        <p className="text-sm text-danger">
+          Esta lista ya no cumple el esquema actual. Solicita cambios para que se rehaga.
+        </p>
+        <div className="mt-4 grid gap-6 lg:grid-cols-2">
+          <DecisionForms submissionId={submission.id} />
+        </div>
+      </Panel>
+    );
+  }
+  const roster = parsed.data;
+  const report = submission.validationReport as RosterValidationReport | null;
+  const failedSources = report?.sources.filter((s) => !s.ok) ?? [];
+  const sources = new Map(roster.sources.map((s) => [s.id, s]));
+  const existing = await findExisting(
+    db,
+    roster.people.map((p) => p.fullName),
+  );
+  const next = segmentKey ? nextWaveSegment(segmentKey) : undefined;
+
+  return (
+    <>
+      <Panel title="Validación">
+        <ul className="space-y-2 text-sm">
+          <li>
+            Fuentes: {roster.sources.length}, {failedSources.length} no respondieron a la
+            verificación automática
+            {failedSources.length > 0 && " (revisar a mano)"}.
+          </li>
+          {failedSources.map((s) => (
+            <li key={s.id} className="pl-4 text-xs break-all text-muted">
+              {s.id} · {s.status ?? "sin respuesta"} · {s.url}
+            </li>
+          ))}
+          {roster.gaps.length > 0 && (
+            <li>
+              Vacíos señalados por la investigación:
+              <ul className="list-disc pl-5 text-muted">
+                {roster.gaps.map((g) => (
+                  <li key={g}>{g}</li>
+                ))}
+              </ul>
+            </li>
+          )}
+          {roster.confidenceNotes && (
+            <li className="text-muted">Notas: {roster.confidenceNotes}</li>
+          )}
+        </ul>
+      </Panel>
+
+      <Panel title={`Personas encontradas (${roster.people.length})`}>
+        <ActionForm
+          action={approveRosterAction.bind(null, submission.id)}
+          submitLabel="Aprobar y poner en cola las seleccionadas"
+          submitClassName={buttonClass}
+        >
+          <p className="text-sm text-muted">
+            Desmarca a quien no corresponda. Quienes ya tienen perfil o investigación abierta se
+            omiten aunque estén marcados.
+            {next && <> Al aprobar se pone en cola el descubrimiento de «{next.title}».</>}
+          </p>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="border-b border-border text-muted">
+                <tr>
+                  <th className="py-2 pr-3 font-medium">
+                    <span className="sr-only">Incluir</span>
+                  </th>
+                  <th className="py-2 pr-3 font-medium">Persona</th>
+                  <th className="py-2 pr-3 font-medium">Cargo</th>
+                  <th className="py-2 pr-3 font-medium">Fuentes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {roster.people.map((person, i) => {
+                  const reason = existing[i]?.reason;
+                  return (
+                    <tr key={i} className="border-b border-border align-top">
+                      <td className="py-2 pr-3">
+                        <input
+                          type="checkbox"
+                          name={`person:${i}`}
+                          defaultChecked={!reason}
+                          aria-label={`Incluir a ${person.fullName}`}
+                        />
+                      </td>
+                      <td className="py-2 pr-3">
+                        <p className="font-medium">{person.fullName}</p>
+                        {person.knownAs && <p className="text-muted">{person.knownAs}</p>}
+                        {reason && <Badge>{skipReasonLabel[reason]}</Badge>}
+                      </td>
+                      <td className="py-2 pr-3">
+                        <p>{person.office}</p>
+                        <p className="text-muted">
+                          {[person.province, person.partyAcronym].filter(Boolean).join(" · ")}
+                        </p>
+                        {person.notes && <p className="text-xs text-muted">{person.notes}</p>}
+                      </td>
+                      <td className="py-2 pr-3">
+                        {person.sourceIds.map((id) => {
+                          const source = sources.get(id);
+                          return source ? (
+                            <a
+                              key={id}
+                              href={source.url}
+                              target="_blank"
+                              rel="noopener noreferrer nofollow"
+                              className="mr-2 text-accent underline"
+                              title={`${source.title} · ${source.publisher}`}
+                            >
+                              {id}
+                            </a>
+                          ) : null;
+                        })}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <textarea
+            name="note"
+            rows={2}
+            className={inputClass}
+            placeholder="Nota de la revisión (opcional)"
+          />
+        </ActionForm>
+      </Panel>
+
+      <Panel title="Otras decisiones">
+        <div className="grid gap-6 lg:grid-cols-2">
+          <DecisionForms submissionId={submission.id} />
+        </div>
+      </Panel>
     </>
   );
 }

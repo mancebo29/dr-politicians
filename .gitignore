@@ -51,3 +51,4 @@ next-env.d.ts
 # research session working files (submissions live in the database)
 /research/briefs
 /research/out
+/research/logs

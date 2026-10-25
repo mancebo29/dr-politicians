@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { promoteToAdmin } from "@/lib/admin/promote";
-import { samplePayload } from "@/lib/research/fixtures";
+import { samplePayload, sampleRoster } from "@/lib/research/fixtures";
 import { e2eDb, register, uniqueUser } from "./support";
 
 test("queue, claim, submit, review and publish a research job", async ({ page }) => {
@@ -99,4 +99,56 @@ test("queues a wave from a pasted list and reports skipped names", async ({ page
   await expect(form.getByRole("status")).toContainText(`${first}: repetido en la lista`);
   await expect(page.getByRole("link", { name: first })).toBeVisible();
   await expect(page.getByRole("link", { name: second })).toBeVisible();
+});
+
+test("discovers a wave roster, approves part of it and chains the next segment", async ({
+  page,
+}) => {
+  const admin = uniqueUser("descubre");
+  await register(page, admin);
+  const db = e2eDb();
+  try {
+    await promoteToAdmin(db, admin.email);
+  } finally {
+    await db.$client.end();
+  }
+  await page.goto("/admin/investigacion/tokens");
+  await page.getByPlaceholder("Ej.: portátil de Jairo").fill("e2e-descubrimiento");
+  await page.getByRole("button", { name: "Crear token" }).click();
+  const token = (await page.getByTestId("new-token").textContent())!.trim();
+  const api = (path: string, data: unknown) =>
+    page.request.post(`/api/research/${path}`, {
+      data,
+      headers: { authorization: `Bearer ${token}` },
+    });
+
+  await page.goto("/admin/investigacion");
+  const discovery = page.locator("form", { has: page.locator('select[name="segment"]') });
+  await expect(discovery.locator("select")).toHaveValue("ola-1");
+  await discovery.getByRole("button", { name: "Descubrir con IA" }).click();
+  await expect(discovery.getByRole("status")).toContainText("Descubrimiento en cola");
+
+  const { brief } = await (await api("claim", {})).json();
+  expect(brief.job.kind).toBe("roster_discovery");
+  expect(brief.segment.key).toBe("ola-1");
+  const stamp = Date.now();
+  const roster = sampleRoster();
+  roster.people = roster.people.slice(0, 2).map((p, i) => ({
+    ...p,
+    fullName: `${p.fullName} ${stamp}-${i}`,
+  }));
+  expect((await api("submit", { jobId: brief.job.id, payload: roster })).status()).toBe(200);
+  expect(await (await api("status", { jobId: brief.job.id })).json()).toMatchObject({
+    status: "submitted",
+  });
+
+  await page.goto(`/admin/investigacion/${brief.job.id}`);
+  await expect(page.getByRole("heading", { name: "Personas encontradas (2)" })).toBeVisible();
+  await page.getByRole("checkbox", { name: `Incluir a ${roster.people[1].fullName}` }).uncheck();
+  await page.getByRole("button", { name: "Aprobar y poner en cola las seleccionadas" }).click();
+
+  await expect(page).toHaveURL(/\/admin\/investigacion$/);
+  await expect(page.getByRole("link", { name: roster.people[0].fullName })).toBeVisible();
+  await expect(page.getByRole("link", { name: roster.people[1].fullName })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Ola 2 · Senado y gabinete" })).toBeVisible();
 });

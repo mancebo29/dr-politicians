@@ -93,6 +93,9 @@ export async function publishSubmission(db: Database, input: PublishInput) {
       .for("update");
     if (!row) throw new PublishError("Submission not found");
     const { submission, job } = row;
+    if (job.kind === "roster_discovery") {
+      throw new PublishError("Rosters are approved from their review page, not published");
+    }
     if (job.status !== "submitted" || submission.decidedAt) {
       throw new PublishError(`Job is ${job.status}; only submitted jobs can be published`);
     }

@@ -12,12 +12,17 @@ import {
 import { seedReferenceData } from "@/db/seed/reference";
 import { loadProfile } from "@/lib/profiles/load";
 import { createTestDb, truncateAll } from "@/test/db";
-import { samplePayload } from "./fixtures";
+import { samplePayload, sampleRoster } from "./fixtures";
 import { publishSections, publishSubmission, PublishError } from "./publish";
 import {
+  approveRoster,
   claimNextJob,
+  createDiscoveryJob,
   createJob,
   createJobs,
+  jobStatus,
+  MAX_ATTEMPTS,
+  releaseJob,
   decideSubmission,
   heartbeat,
   LEASE_MS,
@@ -390,5 +395,122 @@ describe("publishSubmission", () => {
     };
     await publishSubmission(db, input);
     await expect(publishSubmission(db, input)).rejects.toThrow(/only submitted jobs/);
+  });
+});
+
+describe("roster discovery", () => {
+  async function submitRoster(payload: unknown = sampleRoster()) {
+    const job = await createDiscoveryJob(db, { segmentKey: "ola-1", createdByUserId: reviewerId });
+    const brief = await claimNextJob(db, tokenId);
+    expect(brief?.job.id).toBe(job.id);
+    const result = await submitResearch(db, {
+      tokenId,
+      jobId: job.id,
+      payload,
+      checkSources: allOk,
+    });
+    return { job, brief: brief!, ...result };
+  }
+
+  it("briefs the session with the segment and who is already covered", async () => {
+    await createJob(db, { kind: "new_profile", requestedName: "Ya en Cola" });
+    await db.insert(politicians).values({ slug: "ya-publicado", fullName: "Ya Publicado" });
+    const job = await createDiscoveryJob(db, { segmentKey: "ola-1" });
+    expect(job).toMatchObject({ kind: "roster_discovery", wave: 1, rosterSegment: "ola-1" });
+    await expect(createDiscoveryJob(db, { segmentKey: "ola-1" })).rejects.toThrow(
+      /already has an open discovery job/,
+    );
+    await expect(createDiscoveryJob(db, { segmentKey: "nope" })).rejects.toThrow(/Unknown/);
+
+    // Discovery outranks profile jobs.
+    const brief = await claimNextJob(db, tokenId);
+    expect(brief?.job.id).toBe(job.id);
+    expect(brief?.segment?.key).toBe("ola-1");
+    expect(brief?.knownPeople).toEqual({ profiles: ["Ya Publicado"], queued: ["Ya en Cola"] });
+  });
+
+  it("validates rosters against the job's segment", async () => {
+    const job = await createDiscoveryJob(db, { segmentKey: "ola-1" });
+    await claimNextJob(db, tokenId);
+    const submit = (payload: unknown) =>
+      submitResearch(db, { tokenId, jobId: job.id, payload, checkSources: allOk });
+    await expect(submit(sampleRoster({ segment: "ola-2" }))).rejects.toThrow(/segment "ola-1"/);
+    await expect(submit(samplePayload())).rejects.toThrow(/roster schema/);
+    const duplicate = sampleRoster();
+    duplicate.people.push({ ...duplicate.people[0] });
+    await expect(submit(duplicate)).rejects.toMatchObject({
+      issues: ["people.3.fullName: Person listed twice"],
+    });
+    await submit(sampleRoster());
+    expect((await jobStatus(db, tokenId, job.id)).status).toBe("submitted");
+  });
+
+  it("queues the selected people and the next segment's discovery on approval", async () => {
+    await createJob(db, { kind: "new_profile", requestedName: "Persona de Prueba Ejemplo" });
+    const { job, submissionId } = await submitRoster();
+    await expect(
+      publishSubmission(db, {
+        submissionId,
+        reviewerUserId: reviewerId,
+        sections: publishSections,
+      }),
+    ).rejects.toThrow(PublishError);
+
+    const result = await approveRoster(db, {
+      submissionId,
+      reviewerUserId: reviewerId,
+      selected: [0, 2],
+    });
+    expect(result.created.map((j) => [j.requestedName, j.wave])).toEqual([
+      ["Primera Persona Ficticia", 1],
+    ]);
+    expect(result.created[0].instructions).toBe(
+      "Senadora por Santiago (2024–2028) (Santiago, PRM). Encontrado en el descubrimiento «Ola 1 · Figuras nacionales».",
+    );
+    expect(result.skipped).toEqual([
+      { name: "Persona de Prueba Ejemplo", reason: "ya tiene una investigación abierta" },
+    ]);
+    expect(result.next).toMatchObject({ kind: "roster_discovery", rosterSegment: "ola-2" });
+    expect((await jobStatus(db, tokenId, job.id)).status).toBe("approved");
+
+    await expect(
+      approveRoster(db, { submissionId, reviewerUserId: reviewerId, selected: [1] }),
+    ).rejects.toThrow(/no pending submission/);
+  });
+
+  it("rejects selections outside the roster", async () => {
+    const { submissionId } = await submitRoster();
+    await expect(
+      approveRoster(db, { submissionId, reviewerUserId: reviewerId, selected: [3] }),
+    ).rejects.toThrow(/Selection/);
+  });
+
+  it("does not queue the next discovery twice", async () => {
+    const { submissionId } = await submitRoster();
+    await createDiscoveryJob(db, { segmentKey: "ola-2" });
+    const result = await approveRoster(db, {
+      submissionId,
+      reviewerUserId: reviewerId,
+      selected: [],
+    });
+    expect(result.next).toBeNull();
+  });
+});
+
+describe("releaseJob", () => {
+  it("requeues an unfinished job, and fails it after the last attempt", async () => {
+    const job = await createJob(db, { kind: "new_profile", requestedName: "Alguien" });
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      await claimNextJob(db, tokenId);
+      expect(await jobStatus(db, tokenId, job.id)).toEqual({
+        status: "claimed",
+        attempts: attempt,
+        heldByYou: true,
+      });
+      const { status } = await releaseJob(db, tokenId, job.id);
+      expect(status).toBe(attempt < MAX_ATTEMPTS ? "queued" : "failed");
+    }
+    expect(await claimNextJob(db, tokenId)).toBeNull();
+    await expect(releaseJob(db, tokenId, job.id)).rejects.toThrow(/does not hold the lease/);
   });
 });

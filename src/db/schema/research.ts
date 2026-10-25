@@ -43,6 +43,8 @@ export const researchJobKind = pgEnum("research_job_kind", [
   "new_profile",
   "refresh",
   "targeted_correction",
+  // Finds who belongs in a wave segment; approving its roster queues new_profile jobs.
+  "roster_discovery",
 ]);
 export const researchJobStatus = pgEnum("research_job_status", [
   "queued",
@@ -66,6 +68,8 @@ export const researchJobs = pgTable(
     instructions: text(),
     priority: integer().notNull().default(0),
     wave: integer(),
+    // roster_discovery only: the key of the wave segment (src/lib/research/waves.ts).
+    rosterSegment: text(),
     status: researchJobStatus().notNull().default("queued"),
     claimedByTokenId: uuid().references(() => researchTokens.id, { onDelete: "set null" }),
     leaseExpiresAt: timestamp({ withTimezone: true }),
@@ -79,9 +83,15 @@ export const researchJobs = pgTable(
       "research_jobs_target",
       sql`${t.politicianId} is not null or ${t.requestedName} is not null`,
     ),
+    // Kinds are compared as text: a check that spells a newly added enum value
+    // fails in the migration transaction that adds it.
     check(
       "research_jobs_new_profile_target",
-      sql`${t.kind} = 'new_profile' or ${t.politicianId} is not null`,
+      sql`${t.kind}::text in ('new_profile', 'roster_discovery') or ${t.politicianId} is not null`,
+    ),
+    check(
+      "research_jobs_roster_segment",
+      sql`(${t.kind}::text = 'roster_discovery') = (${t.rosterSegment} is not null)`,
     ),
     check(
       "research_jobs_lease",

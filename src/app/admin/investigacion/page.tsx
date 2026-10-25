@@ -14,7 +14,13 @@ import { db } from "@/db";
 import { politicians, researchJobs, researchTokens } from "@/db/schema";
 import { jobKindLabel, jobStatusLabel } from "@/lib/labels";
 import { requireRole } from "@/lib/session";
-import { createJobAction, createJobsAction, jobStatusAction } from "./actions";
+import { waveSegments } from "@/lib/research/waves";
+import {
+  createJobAction,
+  createJobsAction,
+  jobStatusAction,
+  startDiscoveryAction,
+} from "./actions";
 
 export const metadata: Metadata = { title: "Investigación" };
 export const instant = false;
@@ -38,7 +44,7 @@ const statusOrder = sql`case ${researchJobs.status}
 
 export default async function ResearchQueuePage() {
   await requireRole(["admin"], "/admin/investigacion");
-  const [jobs, profiles] = await Promise.all([
+  const [jobs, profiles, discoveries] = await Promise.all([
     db
       .select({
         job: researchJobs,
@@ -54,7 +60,22 @@ export default async function ResearchQueuePage() {
       .select({ id: politicians.id, fullName: politicians.fullName })
       .from(politicians)
       .orderBy(politicians.fullName),
+    db
+      .select({ segment: researchJobs.rosterSegment, status: researchJobs.status })
+      .from(researchJobs)
+      .where(eq(researchJobs.kind, "roster_discovery"))
+      .orderBy(desc(researchJobs.createdAt)),
   ]);
+  // Latest discovery status per segment; the default choice is the first
+  // segment that has not been discovered or queued yet.
+  const segmentStatus = new Map<string, (typeof discoveries)[number]["status"]>();
+  for (const d of discoveries)
+    if (d.segment && !segmentStatus.has(d.segment)) segmentStatus.set(d.segment, d.status);
+  const nextSegment = waveSegments.find(
+    (s) =>
+      !segmentStatus.has(s.key) ||
+      ["rejected", "cancelled", "failed"].includes(segmentStatus.get(s.key)!),
+  );
 
   return (
     <div>
@@ -68,6 +89,31 @@ export default async function ResearchQueuePage() {
         Investigación
       </PageTitle>
 
+      <Panel title="Descubrir una ola">
+        <ActionForm
+          action={startDiscoveryAction}
+          submitLabel="Descubrir con IA"
+          submitClassName={buttonClass}
+        >
+          <p className="text-sm text-muted">
+            La IA busca en fuentes oficiales quiénes forman el segmento y entrega la lista para tu
+            aprobación. Al aprobarla se ponen en cola sus perfiles y el descubrimiento del segmento
+            siguiente. Se procesa con <code className="font-mono">pnpm research:run</code>.
+          </p>
+          <label className="flex flex-col gap-1 text-sm sm:max-w-md">
+            Segmento
+            <select name="segment" className={inputClass} defaultValue={nextSegment?.key}>
+              {waveSegments.map((s) => (
+                <option key={s.key} value={s.key}>
+                  {s.title}
+                  {segmentStatus.has(s.key) && ` — ${jobStatusLabel[segmentStatus.get(s.key)!]}`}
+                </option>
+              ))}
+            </select>
+          </label>
+        </ActionForm>
+      </Panel>
+
       <Panel title="Nueva investigación">
         <ActionForm
           action={createJobAction}
@@ -78,11 +124,13 @@ export default async function ResearchQueuePage() {
             <label className="flex flex-col gap-1 text-sm">
               Tipo
               <select name="kind" className={inputClass} defaultValue="new_profile">
-                {Object.entries(jobKindLabel).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
+                {Object.entries(jobKindLabel)
+                  .filter(([value]) => value !== "roster_discovery")
+                  .map(([value, label]) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
               </select>
             </label>
             <label className="flex flex-col gap-1 text-sm">

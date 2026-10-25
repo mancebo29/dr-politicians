@@ -27,6 +27,7 @@
     "research:validate": "tsx --env-file-if-exists=.env.local scripts/research.ts validate",
     "research:submit": "tsx --env-file-if-exists=.env.local scripts/research.ts submit",
     "research:heartbeat": "tsx --env-file-if-exists=.env.local scripts/research.ts heartbeat",
+    "research:run": "tsx --env-file-if-exists=.env.local scripts/research-run.ts",
     "research:token": "tsx --env-file-if-exists=.env.local scripts/research-token.ts",
     "spike:ranking": "tsx scripts/spike-ranking-sources.ts"
   },

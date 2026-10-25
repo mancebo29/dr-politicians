@@ -63,14 +63,22 @@ so stop any running `pnpm dev` first (Next allows one dev server per project).
 Profiles are researched with Claude Code and published only after admin review
 (PLAN §6). The protocol lives in `.claude/skills/research-politician/SKILL.md`.
 
-1. An admin queues jobs in `/admin/investigacion` and creates a research token
-   in `/admin/investigacion/tokens` (or `pnpm research:token <name>` locally).
+1. An admin starts AI discovery for a wave segment in `/admin/investigacion`
+   (or queues people by name) and creates a research token in
+   `/admin/investigacion/tokens` (or `pnpm research:token <name>` locally).
 2. Put the token in `.env.local` as `RESEARCH_TOKEN` (and `RESEARCH_API_URL` if
-   the app isn't on `http://localhost:3000`), then in Claude Code ask it to
-   research the next profile. It runs `pnpm research:claim`, writes
-   `research/out/<jobId>.json`, checks it with `pnpm research:validate` and
-   sends it with `pnpm research:submit <jobId> <file>`.
-3. The admin reviews the diff, validation report and preview, then approves
+   the app isn't on `http://localhost:3000`), then run `pnpm research:run`
+   (`--max-jobs`, `--max-hours`, `--timeout-min`, `--model`). It claims each
+   job and runs a headless Claude Code session for it with
+   `.claude/skills/discover-roster` (rosters) or
+   `.claude/skills/research-politician` (profiles). Sessions write
+   `research/out/<jobId>.json`, check it with `pnpm research:validate` and send
+   it with `pnpm research:submit <jobId> <file>`; logs go to `research/logs/`.
+   The same commands work by hand: `pnpm research:claim`, then ask Claude Code
+   to research the claimed job.
+3. Discovered rosters are approved person by person in the job's review page;
+   approval queues their profiles and the next segment's discovery.
+4. For profiles, the admin reviews the diff, validation report and preview, then approves
    selected sections, requests changes (the note goes back with the next claim),
    rejects, or edits the JSON (saved as a new submission version).
 

@@ -1,3 +1,4 @@
+import type { RosterPayloadInput } from "./roster";
 import type { ResearchPayloadInput } from "./schema";
 
 // A small, valid submission for tests. Values are illustrative, not research.
@@ -104,6 +105,43 @@ export function samplePayload(overrides: Partial<ResearchPayloadInput> = {}): Re
         url: "https://example.gob.do/ley",
         title: "Ley 1-99",
         publisher: "Gaceta Oficial",
+        accessedOn: "2026-10-24",
+        tier: "official",
+      },
+    ],
+    gaps: [],
+    ...overrides,
+  };
+}
+
+// A small, valid roster for tests. Names are invented.
+export function sampleRoster(overrides: Partial<RosterPayloadInput> = {}): RosterPayloadInput {
+  return {
+    schemaVersion: 1,
+    segment: "ola-1",
+    people: [
+      {
+        fullName: "Primera Persona Ficticia",
+        office: "Senadora por Santiago (2024–2028)",
+        province: "Santiago",
+        partyAcronym: "PRM",
+        sourceIds: ["s1"],
+      },
+      {
+        fullName: "Segunda Persona Ficticia",
+        knownAs: "Segunda",
+        office: "Ministro de Pruebas",
+        notes: "No confundir con su hermano.",
+        sourceIds: ["s1"],
+      },
+      { fullName: "Persona de Prueba Ejemplo", office: "Diputado", sourceIds: ["s1"] },
+    ],
+    sources: [
+      {
+        id: "s1",
+        url: "https://example.gob.do/listado",
+        title: "Listado oficial",
+        publisher: "Senado de la República",
         accessedOn: "2026-10-24",
         tier: "official",
       },

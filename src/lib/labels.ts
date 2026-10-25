@@ -118,6 +118,7 @@ export const jobKindLabel: Labels<typeof researchJobKind> = {
   new_profile: "Perfil nuevo",
   refresh: "Actualización",
   targeted_correction: "Corrección puntual",
+  roster_discovery: "Descubrimiento de ola",
 };
 
 export const jobStatusLabel: Labels<typeof researchJobStatus> = {
