@@ -13,6 +13,8 @@ import {
   positionOrigin,
   sourceTier,
   statementKind,
+  workRecordKind,
+  workRecordStatus,
 } from "@/db/schema";
 import { partialDateSchema, toDbDate } from "@/lib/partial-date";
 
@@ -48,6 +50,18 @@ export const positionSchema = z.object({
   ...period,
   howObtained: z.enum(positionOrigin.enumValues).nullish(),
   isCurrent: z.boolean().default(false),
+  sourceIds,
+});
+
+export const workRecordItemSchema = z.object({
+  title: text(300),
+  kind: z.enum(workRecordKind.enumValues),
+  status: z.enum(workRecordStatus.enumValues).default("unknown"),
+  topic: text(100),
+  // The office held while doing it, e.g. "Presidente de la República".
+  office: optionalText(200),
+  description: text(2000),
+  ...period,
   sourceIds,
 });
 
@@ -117,6 +131,7 @@ export const researchPayloadSchema = z
       summarySourceIds: sourceIds,
     }),
     positions: z.array(positionSchema).default([]),
+    workRecord: z.array(workRecordItemSchema).default([]),
     partyMemberships: z.array(partyMembershipSchema).default([]),
     alliances: z.array(allianceSchema).default([]),
     legislation: z.array(legislationSchema).default([]),
@@ -184,7 +199,7 @@ export const researchPayloadSchema = z
       }
     });
 
-    for (const section of ["positions", "partyMemberships", "alliances"] as const) {
+    for (const section of ["positions", "workRecord", "partyMemberships", "alliances"] as const) {
       payload[section].forEach((claim, i) => {
         const start = toDbDate(claim.start).date;
         const end = toDbDate(claim.end).date;
@@ -211,6 +226,7 @@ export const researchPayloadSchema = z
 
 export const claimSections = [
   "positions",
+  "workRecord",
   "partyMemberships",
   "alliances",
   "legislation",

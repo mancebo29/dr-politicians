@@ -18,6 +18,7 @@ import {
   researchSubmissions,
   sources,
   statements,
+  workRecordItems,
 } from "@/db/schema";
 import { toDbDate } from "@/lib/partial-date";
 import { loadProfile } from "@/lib/profiles/load";
@@ -35,6 +36,7 @@ type ClaimType = (typeof claimTypes)[number];
 
 const claimTable = {
   positions: { table: positions, type: "position" },
+  workRecord: { table: workRecordItems, type: "work_record_item" },
   partyMemberships: { table: partyMemberships, type: "party_membership" },
   alliances: { table: alliances, type: "alliance" },
   legislation: { table: politicianLegislation, type: "politician_legislation" },
@@ -254,6 +256,21 @@ export async function publishSubmission(db: Database, input: PublishInput) {
               isCurrent: c.isCurrent,
             })
             .returning({ id: positions.id });
+        } else if (section === "workRecord") {
+          const c = claim as (typeof payload.workRecord)[number];
+          [{ id }] = await tx
+            .insert(workRecordItems)
+            .values({
+              politicianId,
+              title: c.title,
+              kind: c.kind,
+              status: c.status,
+              topic: c.topic,
+              office: c.office ?? null,
+              description: c.description,
+              ...period(c.start, c.end),
+            })
+            .returning({ id: workRecordItems.id });
         } else if (section === "partyMemberships") {
           const c = claim as (typeof payload.partyMemberships)[number];
           [{ id }] = await tx

@@ -126,6 +126,41 @@ export const positions = pgTable(
   ],
 );
 
+// Work done in office that is not a law: programs, public works, policies,
+// new or restructured institutions, international agreements (public "Gestión").
+export const workRecordKind = pgEnum("work_record_kind", [
+  "program",
+  "public_work",
+  "policy",
+  "institutional",
+  "international",
+  "other",
+]);
+export const workRecordStatus = pgEnum("work_record_status", [
+  "announced",
+  "in_progress",
+  "completed",
+  "cancelled",
+  "unknown",
+]);
+
+export const workRecordItems = pgTable(
+  "work_record_items",
+  {
+    id: id(),
+    politicianId: politicianRef(),
+    title: text().notNull(),
+    kind: workRecordKind().notNull(),
+    status: workRecordStatus().notNull().default("unknown"),
+    topic: text().notNull(),
+    office: text(),
+    description: text().notNull(),
+    ...period,
+    ...timestamps,
+  },
+  (t) => [index().on(t.politicianId), ...periodChecks("work_record_items", t)],
+);
+
 export const membershipRole = pgEnum("membership_role", [
   "member",
   "leader",

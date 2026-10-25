@@ -32,6 +32,7 @@ export const claimTypes = [
   "politician_legislation",
   "statement",
   "controversy",
+  "work_record_item",
 ] as const;
 export const claimType = pgEnum("claim_type", claimTypes);
 

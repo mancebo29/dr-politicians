@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { and, desc, eq, gt, ilike, inArray, lt, or, sql } from "drizzle-orm";
+import { and, desc, eq, gt, ilike, inArray, lt, or, sql, type SQLWrapper } from "drizzle-orm";
 import type { Database } from "@/db/client";
 import {
   auditLog,
@@ -65,6 +65,100 @@ export async function createJob(
       after: job,
     });
     return job;
+  });
+}
+
+const normalizedName = (value: SQLWrapper | string) =>
+  sql`lower(public.immutable_unaccent(${value}))`;
+
+// Queues new-profile jobs for a wave, one per person, in list order. Names that
+// repeat in the list, already have an open job, or match a profile's name are
+// skipped and reported, so pasting the same list twice queues nothing new.
+export async function createJobs(
+  db: Database,
+  input: {
+    people: { name: string; instructions?: string | null }[];
+    priority?: number;
+    wave?: number | null;
+    createdByUserId?: string | null;
+  },
+  now = new Date(),
+) {
+  return db.transaction(async (tx) => {
+    const created: (typeof researchJobs.$inferSelect)[] = [];
+    const skipped: { name: string; reason: string }[] = [];
+    const seen = new Set<string>();
+
+    for (const person of input.people) {
+      const name = person.name.trim();
+      const [{ key }] = await tx.execute<{ key: string }>(
+        sql`select ${normalizedName(name)} as key`,
+      );
+      if (seen.has(key)) {
+        skipped.push({ name, reason: "repetido en la lista" });
+        continue;
+      }
+      seen.add(key);
+
+      const [openJob] = await tx
+        .select({ id: researchJobs.id })
+        .from(researchJobs)
+        .where(
+          and(
+            sql`${normalizedName(researchJobs.requestedName)} = ${key}`,
+            inArray(researchJobs.status, [
+              "queued",
+              "claimed",
+              "submitted",
+              "in_review",
+              "needs_changes",
+            ]),
+          ),
+        )
+        .limit(1);
+      if (openJob) {
+        skipped.push({ name, reason: "ya tiene una investigación abierta" });
+        continue;
+      }
+      const [profile] = await tx
+        .select({ id: politicians.id })
+        .from(politicians)
+        .where(
+          or(
+            sql`${normalizedName(politicians.fullName)} = ${key}`,
+            sql`${normalizedName(politicians.knownAs)} = ${key}`,
+          ),
+        )
+        .limit(1);
+      if (profile) {
+        skipped.push({ name, reason: "ya existe un perfil con ese nombre" });
+        continue;
+      }
+
+      const [job] = await tx
+        .insert(researchJobs)
+        .values({
+          kind: "new_profile",
+          requestedName: name,
+          instructions: person.instructions?.trim() || null,
+          priority: input.priority ?? 0,
+          wave: input.wave ?? null,
+          createdByUserId: input.createdByUserId ?? null,
+          // Jobs of equal priority are claimed oldest first; one millisecond
+          // apart keeps the claim order equal to the list order.
+          createdAt: new Date(now.getTime() + created.length),
+        })
+        .returning();
+      await tx.insert(auditLog).values({
+        actorUserId: input.createdByUserId ?? null,
+        action: "research_job.create",
+        entity: "research_job",
+        entityId: job.id,
+        after: job,
+      });
+      created.push(job);
+    }
+    return { created, skipped };
   });
 }
 

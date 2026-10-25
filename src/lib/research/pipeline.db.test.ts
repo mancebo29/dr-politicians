@@ -17,6 +17,7 @@ import { publishSections, publishSubmission, PublishError } from "./publish";
 import {
   claimNextJob,
   createJob,
+  createJobs,
   decideSubmission,
   heartbeat,
   LEASE_MS,
@@ -74,6 +75,40 @@ describe("queue", () => {
     expect((await claimNextJob(db, tokenId))?.job.id).toBe(high.id);
     expect((await claimNextJob(db, tokenId))?.job.id).toBe(low.id);
     expect(await claimNextJob(db, tokenId)).toBeNull();
+  });
+
+  it("queues a wave in list order and skips repeats, open jobs and existing profiles", async () => {
+    await createJob(db, { kind: "new_profile", requestedName: "Persona Abierta" });
+    await db.insert(politicians).values({ slug: "jose-perez", fullName: "José Pérez" });
+
+    const { created, skipped } = await createJobs(db, {
+      people: [
+        { name: "Primera Persona", instructions: "senadora de Santiago" },
+        { name: "Segunda Persona" },
+        { name: "primera persona" },
+        { name: "Persona abierta" },
+        { name: "Jose Perez" },
+      ],
+      wave: 1,
+      createdByUserId: reviewerId,
+    });
+
+    expect(created.map((j) => [j.requestedName, j.wave, j.instructions])).toEqual([
+      ["Primera Persona", 1, "senadora de Santiago"],
+      ["Segunda Persona", 1, null],
+    ]);
+    expect(skipped.map((s) => s.name)).toEqual([
+      "primera persona",
+      "Persona abierta",
+      "Jose Perez",
+    ]);
+    // The earlier single job is claimed first, then the wave in list order.
+    await claimNextJob(db, tokenId);
+    expect((await claimNextJob(db, tokenId))?.job.requestedName).toBe("Primera Persona");
+    expect((await claimNextJob(db, tokenId))?.job.requestedName).toBe("Segunda Persona");
+
+    const again = await createJobs(db, { people: [{ name: "Segunda Persona" }] });
+    expect(again.created).toHaveLength(0);
   });
 
   it("returns jobs with expired leases to the queue", async () => {
@@ -224,6 +259,16 @@ describe("publishSubmission", () => {
     expect(profile?.payload.positions[0].province).toBe("Santiago");
     expect(profile?.payload.positions[1].start).toBe("2024-08");
     expect(profile?.payload.controversies[0].sourceIds).toHaveLength(2);
+    expect(profile?.payload.workRecord).toEqual([
+      expect.objectContaining({
+        title: "Programa de prueba",
+        status: "completed",
+        office: "Ministro de Prueba",
+        start: "2024-09",
+        end: "2025",
+        sourceIds: [expect.stringMatching(/^s\d+$/)],
+      }),
+    ]);
 
     const [p] = await db.select().from(politicians).where(eq(politicians.id, result.politicianId));
     const [prm] = await db.select().from(parties).where(eq(parties.acronym, "PRM"));
@@ -262,7 +307,7 @@ describe("publishSubmission", () => {
 
     const profile = (await loadProfile(db, { id: politicianId }))!;
     expect(profile.payload.positions.map((p) => p.title)).toEqual(["Ministro de Prueba"]);
-    expect(profile.payload.statements).toHaveLength(1);
+    expect(profile.payload.statements).toHaveLength(2);
     expect(await db.$count(positions)).toBe(1);
     // Replaced claims take their source links with them.
     const orphanLinks = await db.execute(
@@ -271,6 +316,37 @@ describe("publishSubmission", () => {
     );
     expect(orphanLinks).toHaveLength(0);
     expect(await db.$count(profileRevisions)).toBe(2);
+  });
+
+  it("removes a replaced work record together with its source links", async () => {
+    const first = await submitNew();
+    const { politicianId } = await publishSubmission(db, {
+      submissionId: first.submissionId,
+      reviewerUserId: reviewerId,
+      sections: publishSections,
+      note: "Perfil inicial",
+    });
+
+    const refresh = await createJob(db, { kind: "refresh", politicianId });
+    await claimNextJob(db, tokenId);
+    const { submissionId } = await submitResearch(db, {
+      tokenId,
+      jobId: refresh.id,
+      payload: samplePayload({ workRecord: [] }),
+      checkSources: allOk,
+    });
+    await publishSubmission(db, {
+      submissionId,
+      reviewerUserId: reviewerId,
+      sections: ["workRecord"],
+      note: "Retira la gestión",
+    });
+
+    expect((await loadProfile(db, { id: politicianId }))!.payload.workRecord).toEqual([]);
+    const links = await db.execute(
+      sql`select 1 from claim_sources where claim_type = 'work_record_item'`,
+    );
+    expect(links).toHaveLength(0);
   });
 
   it("refuses unknown provinces and leaves nothing behind", async () => {

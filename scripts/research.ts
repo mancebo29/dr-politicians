@@ -62,7 +62,8 @@ const commands: Record<string, (args: string[]) => Promise<void>> = {
     if (result.success) {
       const p = result.data;
       console.log(
-        `Valid. ${p.sources.length} sources; ${p.positions.length} positions, ${p.partyMemberships.length} memberships, ` +
+        `Valid. ${p.sources.length} sources; ${p.positions.length} positions, ${p.workRecord.length} work record, ` +
+          `${p.partyMemberships.length} memberships, ` +
           `${p.legislation.length} legislation, ${p.statements.length} statements, ${p.controversies.length} controversies.`,
       );
       return;

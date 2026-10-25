@@ -29,6 +29,20 @@
       "when": 1792874070299,
       "tag": "0003_free_alex_wilder",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792885664362,
+      "tag": "0004_work_record",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792885666689,
+      "tag": "0005_work_record_integrity",
+      "breakpoints": true
     }
   ]
 }

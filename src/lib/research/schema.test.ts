@@ -44,10 +44,23 @@ describe("research payload schema", () => {
     const payload = samplePayload();
     payload.positions![0].end = "2019";
     payload.positions![1].end = "2025";
+    payload.workRecord![0].end = "2023";
     expect(issues(payload)).toEqual([
       "positions.0.end: Ends before it starts",
+      "workRecord.0.end: Ends before it starts",
       "positions.1.end: A current position cannot have an end date",
     ]);
+  });
+
+  it("checks work-record sources and accepts payloads written before the section existed", () => {
+    const payload = samplePayload();
+    payload.workRecord![0].sourceIds = ["s99"];
+    expect(issues(payload)).toEqual(['workRecord.0.sourceIds.0: Unknown source id "s99"']);
+
+    const legacy = samplePayload();
+    delete legacy.workRecord;
+    const parsed = researchPayloadSchema.parse(legacy);
+    expect(parsed.workRecord).toEqual([]);
   });
 
   it("requires a source when reporting that the person has died", () => {

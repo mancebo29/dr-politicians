@@ -73,3 +73,30 @@ test("queue, claim, submit, review and publish a research job", async ({ page })
   await page.goto(`/?q=${encodeURIComponent(name)}`);
   await expect(page.getByRole("link", { name })).toBeVisible();
 });
+
+test("queues a wave from a pasted list and reports skipped names", async ({ page }) => {
+  const admin = uniqueUser("ola");
+  await register(page, admin);
+  const db = e2eDb();
+  try {
+    await promoteToAdmin(db, admin.email);
+  } finally {
+    await db.$client.end();
+  }
+
+  const stamp = Date.now();
+  const first = `Primera Ola ${stamp}`;
+  const second = `Segunda Ola ${stamp}`;
+  await page.goto("/admin/investigacion");
+  const form = page.locator("form", { has: page.locator('textarea[name="people"]') });
+  await form
+    .locator('textarea[name="people"]')
+    .fill(`${first} | vicepresidenta\n${second}\n${first}\n`);
+  await form.locator('input[name="wave"]').fill("1");
+  await form.getByRole("button", { name: "Agregar personas a la cola" }).click();
+
+  await expect(form.getByRole("status")).toContainText("2 en cola; 1 omitidas:");
+  await expect(form.getByRole("status")).toContainText(`${first}: repetido en la lista`);
+  await expect(page.getByRole("link", { name: first })).toBeVisible();
+  await expect(page.getByRole("link", { name: second })).toBeVisible();
+});

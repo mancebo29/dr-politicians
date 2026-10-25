@@ -4,6 +4,8 @@ import {
   legalStatusLabel,
   membershipRoleLabel,
   statementKindLabel,
+  workRecordKindLabel,
+  workRecordStatusLabel,
 } from "@/lib/labels";
 import { formatPartialDate } from "@/lib/partial-date";
 import type { ClaimSection, ResearchPayload } from "./schema";
@@ -12,6 +14,7 @@ export const sectionLabel: Record<ClaimSection | "politician" | "photo", string>
   politician: "Datos personales y resumen",
   photo: "Foto",
   positions: "Cargos",
+  workRecord: "Gestión",
   partyMemberships: "Partidos",
   alliances: "Alianzas",
   legislation: "Leyes e iniciativas",
@@ -34,6 +37,10 @@ export function claimSummary<S extends ClaimSection>(
       const c = claim as ResearchPayload["positions"][number];
       const place = [c.municipality, c.province].filter(Boolean).join(", ");
       return `${c.title} — ${c.institution}${place ? `, ${place}` : ""}${span(c.start, c.isCurrent ? null : c.end)}`;
+    }
+    case "workRecord": {
+      const c = claim as ResearchPayload["workRecord"][number];
+      return `${workRecordKindLabel[c.kind]} · ${c.topic}: ${c.title} · ${workRecordStatusLabel[c.status]}${span(c.start, c.end)}`;
     }
     case "partyMemberships": {
       const c = claim as ResearchPayload["partyMemberships"][number];

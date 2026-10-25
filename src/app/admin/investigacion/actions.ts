@@ -8,6 +8,7 @@ import { invalidatePublicProfile } from "@/lib/public/invalidate";
 import { PublishError, publishSections, publishSubmission } from "@/lib/research/publish";
 import {
   createJob,
+  createJobs,
   decideSubmission,
   QueueError,
   reviseSubmission,
@@ -17,9 +18,16 @@ import { checkSourcesOverHttp } from "@/lib/research/source-check";
 import { createResearchToken, revokeResearchToken } from "@/lib/research/tokens";
 import { requireRole } from "@/lib/session";
 
-export type ActionState = { error?: string; issues?: string[]; token?: string } | null;
+export type ActionState = {
+  error?: string;
+  issues?: string[];
+  token?: string;
+  notice?: string;
+  noticeItems?: string[];
+} | null;
 
 const ADMIN = ["admin"] as const;
+const MAX_BULK_JOBS = 300;
 const kinds = researchJobs.kind.enumValues;
 
 function field(form: FormData, key: string) {
@@ -52,6 +60,36 @@ export async function createJobAction(_: ActionState, form: FormData): Promise<A
   });
   revalidatePath("/admin/investigacion");
   return null;
+}
+
+// One person per line: "Nombre completo" or "Nombre completo | instrucciones".
+export async function createJobsAction(_: ActionState, form: FormData): Promise<ActionState> {
+  const { user } = await requireRole(ADMIN, "/admin/investigacion");
+  const people = field(form, "people")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [name, ...rest] = line.split("|");
+      return { name: name.trim(), instructions: rest.join("|").trim() || null };
+    })
+    .filter((person) => person.name);
+  if (!people.length) return { error: "Escribe al menos un nombre, uno por línea." };
+  if (people.length > MAX_BULK_JOBS) {
+    return { error: `Agrega como máximo ${MAX_BULK_JOBS} personas a la vez.` };
+  }
+  const waveText = field(form, "wave");
+  const { created, skipped } = await createJobs(db, {
+    people,
+    priority: Number(field(form, "priority") || 0),
+    wave: waveText ? Number(waveText) : null,
+    createdByUserId: user.id,
+  });
+  revalidatePath("/admin/investigacion");
+  return {
+    notice: `${created.length} en cola${skipped.length ? `; ${skipped.length} omitidas:` : "."}`,
+    noticeItems: skipped.map((s) => `${s.name}: ${s.reason}`),
+  };
 }
 
 export async function jobStatusAction(jobId: string, action: "cancel" | "release") {

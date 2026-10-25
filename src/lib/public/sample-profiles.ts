@@ -88,6 +88,19 @@ export const sampleProfiles: ResearchPayloadInput[] = [
         sourceIds: ["s1"],
       },
     ],
+    workRecord: [
+      {
+        title: "Comisión de ejemplo sobre presupuestos municipales",
+        kind: "institutional",
+        status: "completed",
+        topic: "Gobierno local",
+        office: "Senador",
+        description: "Presidió una comisión ficticia que revisó presupuestos municipales.",
+        start: "2021",
+        end: "2022",
+        sourceIds: ["s1"],
+      },
+    ],
     alliances: [
       {
         counterparty: "Corriente de ejemplo",
@@ -115,6 +128,13 @@ export const sampleProfiles: ResearchPayloadInput[] = [
         context: "Declaración de ejemplo en una entrevista inventada.",
         saidOn: "2024-02-01",
         sourceIds: ["s2"],
+      },
+      {
+        kind: "position",
+        topic: "Educación",
+        context: "Apoya, en un ejemplo inventado, ampliar la tanda extendida.",
+        saidOn: "2023-09",
+        sourceIds: ["s1"],
       },
     ],
     controversies: [

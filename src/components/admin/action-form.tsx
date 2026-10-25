@@ -34,6 +34,18 @@ export function ActionForm({
           )}
         </div>
       )}
+      {state?.notice && (
+        <div role="status" className="rounded-md border border-success px-3 py-2 text-sm">
+          <p>{state.notice}</p>
+          {state.noticeItems && state.noticeItems.length > 0 && (
+            <ul className="mt-1 list-disc pl-5 text-xs">
+              {state.noticeItems.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
       {state?.token && (
         <div role="status" className="rounded-md border border-success px-3 py-2 text-sm">
           <p className="font-medium text-success">

@@ -10,6 +10,8 @@ import type {
   researchJobStatus,
   sourceTier,
   statementKind,
+  workRecordKind,
+  workRecordStatus,
 } from "@/db/schema";
 import type { RoleGroup } from "@/lib/public/filters";
 
@@ -75,6 +77,23 @@ export const statementKindLabel: Labels<typeof statementKind> = {
   statement: "Declaración",
   position: "Postura",
   influence: "Influencia",
+};
+
+export const workRecordKindLabel: Labels<typeof workRecordKind> = {
+  program: "Programa",
+  public_work: "Obra pública",
+  policy: "Política pública",
+  institutional: "Cambio institucional",
+  international: "Acuerdo o gestión internacional",
+  other: "Otro",
+};
+
+export const workRecordStatusLabel: Labels<typeof workRecordStatus> = {
+  announced: "Anunciado",
+  in_progress: "En ejecución",
+  completed: "Completado",
+  cancelled: "Cancelado",
+  unknown: "Estado desconocido",
 };
 
 export const positionOriginLabel: Labels<typeof positionOrigin> = {

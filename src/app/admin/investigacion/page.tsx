@@ -14,7 +14,7 @@ import { db } from "@/db";
 import { politicians, researchJobs, researchTokens } from "@/db/schema";
 import { jobKindLabel, jobStatusLabel } from "@/lib/labels";
 import { requireRole } from "@/lib/session";
-import { createJobAction, jobStatusAction } from "./actions";
+import { createJobAction, createJobsAction, jobStatusAction } from "./actions";
 
 export const metadata: Metadata = { title: "Investigación" };
 export const instant = false;
@@ -120,6 +120,41 @@ export default async function ResearchQueuePage() {
               placeholder="Ej.: verificar el cambio de partido de 2019"
             />
           </label>
+        </ActionForm>
+      </Panel>
+
+      <Panel title="Agregar una ola">
+        <ActionForm
+          action={createJobsAction}
+          submitLabel="Agregar personas a la cola"
+          submitClassName={buttonClass}
+        >
+          <label className="flex flex-col gap-1 text-sm">
+            Personas (una por línea; instrucciones opcionales después de «|»)
+            <textarea
+              name="people"
+              rows={8}
+              required
+              className={`${inputClass} font-mono`}
+              placeholder={
+                "Raquel Peña Rodríguez | vicepresidenta desde 2020\nRicardo de los Santos"
+              }
+            />
+          </label>
+          <div className="grid grid-cols-2 gap-3 sm:max-w-sm">
+            <label className="flex flex-col gap-1 text-sm">
+              Prioridad
+              <input name="priority" type="number" defaultValue={0} className={inputClass} />
+            </label>
+            <label className="flex flex-col gap-1 text-sm">
+              Ola
+              <input name="wave" type="number" min={0} className={inputClass} />
+            </label>
+          </div>
+          <p className="text-sm text-muted">
+            Se crean perfiles nuevos en el orden de la lista. Se omiten los nombres repetidos, los
+            que ya tienen una investigación abierta y los que coinciden con un perfil existente.
+          </p>
         </ActionForm>
       </Panel>
 

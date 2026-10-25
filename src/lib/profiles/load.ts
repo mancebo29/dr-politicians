@@ -16,6 +16,7 @@ import {
   provinces,
   sources,
   statements,
+  workRecordItems,
 } from "@/db/schema";
 import { fromDbDate } from "@/lib/partial-date";
 import type { ResearchPayload } from "@/lib/research/schema";
@@ -51,6 +52,7 @@ export async function loadProfile(
     legislationRows,
     statementRows,
     controversyRows,
+    workRecordRows,
   ] = await Promise.all([
     db
       .select({
@@ -93,6 +95,11 @@ export async function loadProfile(
       .from(controversies)
       .where(eq(controversies.politicianId, p.id))
       .orderBy(asc(controversies.startedOn)),
+    db
+      .select()
+      .from(workRecordItems)
+      .where(eq(workRecordItems.politicianId, p.id))
+      .orderBy(asc(workRecordItems.startDate), asc(workRecordItems.title)),
   ]);
 
   const claimIds: Record<ClaimType, string[]> = {
@@ -103,6 +110,7 @@ export async function loadProfile(
     politician_legislation: legislationRows.map((r) => r.link.id),
     statement: statementRows.map((r) => r.id),
     controversy: controversyRows.map((r) => r.id),
+    work_record_item: workRecordRows.map((r) => r.id),
   };
   const allClaimIds = Object.values(claimIds).flat();
   const links = await db
@@ -179,6 +187,17 @@ export async function loadProfile(
       howObtained: row.howObtained,
       isCurrent: row.isCurrent,
       sourceIds: refs("position", row.id),
+    })),
+    workRecord: workRecordRows.map((row) => ({
+      title: row.title,
+      kind: row.kind,
+      status: row.status,
+      topic: row.topic,
+      office: row.office,
+      description: row.description,
+      start: fromDbDate(row.startDate, row.startDatePrecision),
+      end: fromDbDate(row.endDate, row.endDatePrecision),
+      sourceIds: refs("work_record_item", row.id),
     })),
     partyMemberships: membershipRows.map(({ row, acronym, name }) => ({
       party: { acronym, name },

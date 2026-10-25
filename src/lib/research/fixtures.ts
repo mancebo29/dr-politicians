@@ -33,6 +33,19 @@ export function samplePayload(overrides: Partial<ResearchPayloadInput> = {}): Re
         sourceIds: ["s2"],
       },
     ],
+    workRecord: [
+      {
+        title: "Programa de prueba",
+        kind: "program",
+        status: "completed",
+        topic: "Educación",
+        office: "Ministro de Prueba",
+        description: "Programa ficticio ejecutado desde el ministerio.",
+        start: "2024-09",
+        end: "2025",
+        sourceIds: ["s2"],
+      },
+    ],
     partyMemberships: [
       {
         party: { acronym: "PRM", name: "Partido Revolucionario Moderno" },
@@ -52,6 +65,13 @@ export function samplePayload(overrides: Partial<ResearchPayloadInput> = {}): Re
     ],
     statements: [
       { kind: "statement", topic: "Economía", context: "Entrevista de prueba.", sourceIds: ["s2"] },
+      {
+        kind: "position",
+        topic: "Educación",
+        context: "Defiende ampliar la tanda extendida.",
+        saidOn: "2025-03",
+        sourceIds: ["s1"],
+      },
     ],
     controversies: [
       {

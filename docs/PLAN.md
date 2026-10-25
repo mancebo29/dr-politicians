@@ -26,7 +26,7 @@ after admin review. Two surfaces: a public site (Spanish only) and a backoffice.
 **Goals**
 
 1. A full profile for every in-scope politician, every claim linked to at least one source shown on the site.
-2. Profiles cover: career and roles (with provinces), legislation passed or pushed, party membership and allegiances, influences and notable statements, controversies.
+2. Profiles cover: career and roles (with provinces), work done in office (programs, public works, policies), legislation passed or pushed, stances by topic, party membership and allegiances, influences and notable statements, controversies.
 3. Public list ranked by weekly news prominence, with search and filters (party, current role, province).
 4. Accounts (Google or username/password), threaded comments on profiles, site feedback.
 5. Backoffice: moderation, research queue and review, manual corrections, site configuration, user management.
@@ -133,17 +133,18 @@ All tables have `id`, `created_at`, `updated_at`. `*_id` are foreign keys.
 
 - `politicians` — `slug`, `full_name`, `known_as`, `aliases[]`, `birth_date`, `birth_place`, `death_date` (nullable; set with a source when a profiled person dies, see §3), `photo_url`, `photo_source_id`, `photo_license`, `summary` (career overview), `status` (draft/published/archived), `current_party_id` (derived, cached), `news_query` (admin-editable search string for disambiguation), `published_at`.
 - `positions` — `politician_id`, `title` (e.g., "Senador"), `institution_id`, `province_id`, `municipality_id`, `start_date`, `end_date`, `how_obtained` (elected/appointed/acting), `is_current`.
+- `work_record_items` — work done in office that is not legislation (public "Gestión"): `politician_id`, `title`, `kind` (program, public_work, policy, institutional, international, other), `status` (announced, in_progress, completed, cancelled, unknown), `topic`, `office` (position held at the time), `description`, `start_date`, `end_date`.
 - `party_memberships` — `politician_id`, `party_id`, `role` (member, leader, founder, candidate), `start_date`, `end_date`, `exit_reason`.
 - `alliances` — coalition and allegiance notes: `politician_id`, `counterparty` (party/person/group), `kind` (coalition, faction, mentor, rival), `description`, `start_date`, `end_date`.
 - `legislation` — `title`, `number` (law/bill number), `kind` (law, bill, resolution, decree), `status` (introduced, passed, promulgated, rejected, archived), `introduced_on`, `promulgated_on`, `official_url`.
 - `politician_legislation` — `politician_id`, `legislation_id`, `involvement` (author, co-sponsor, promoter, promulgated, voted_for, voted_against, public_advocate), `notes`.
-- `statements` — notable statements and stated influences: `politician_id`, `kind` (statement, position, influence), `topic`, `quote`, `context`, `said_on`.
+- `statements` — notable statements and stated influences: `politician_id`, `kind` (statement, position, influence), `topic`, `quote`, `context`, `said_on`. `position` entries are the person's stances, shown grouped by topic ("Posturas"); the research skill holds the topic list.
 - `controversies` — `politician_id`, `title`, `summary`, `started_on`, `legal_status` (allegation, under_investigation, charged, convicted, acquitted, dismissed, settled, no_legal_action), `politician_response`, `last_verified_on`.
 
 **Sources (every claim must have ≥1)**
 
 - `sources` — `url` (unique), `title`, `publisher`, `published_on`, `accessed_on`, `archive_url` (Wayback snapshot), `tier` (official, major_press, other), `language`.
-- `claim_sources` — polymorphic link: `claim_type` (position, party_membership, alliance, politician_legislation, statement, controversy, summary), `claim_id`, `source_id`, `quote_excerpt` (short supporting excerpt). Rendered as numbered footnotes on the profile.
+- `claim_sources` — polymorphic link: `claim_type` (position, work_record_item, party_membership, alliance, politician_legislation, statement, controversy, summary), `claim_id`, `source_id`, `quote_excerpt` (short supporting excerpt). Rendered as numbered footnotes on the profile.
 
 **Revisions and research**
 
@@ -215,6 +216,19 @@ Illustrative shape:
       "end": "2024-08-16",
       "howObtained": "elected",
       "sourceIds": ["s2"],
+    },
+  ],
+  "workRecord": [
+    {
+      "title": "...",
+      "kind": "program",
+      "status": "completed",
+      "topic": "Educación",
+      "office": "Ministro de Educación",
+      "description": "...",
+      "start": "2021",
+      "end": "2023",
+      "sourceIds": [],
     },
   ],
   "partyMemberships": [
@@ -307,15 +321,15 @@ Before the first weekly ranking exists, wave order is set manually. Afterwards, 
 
 ### 7.1 Pages
 
-| Route                                                   | Content                                                                                                                                                                                                                                                                                                                                                                                    |
-| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `/`                                                     | Ranked list: photo, full name, current party (badge), current role, province, rank change vs last week. Search bar + filters (party, current role, province). Paginated. "Relevancia en noticias, actualizado semanalmente" with link to methodology.                                                                                                                                      |
-| `/politicos/[slug]`                                     | Header (photo, name, party, current role). Sections: Resumen y trayectoria (timeline of positions with provinces), Leyes e iniciativas, Partidos y alianzas, Declaraciones e influencias, Controversias. Numbered source footnotes per claim; "Fuentes" list with publisher, date, original + archived link. "Última actualización" + revision note. "Reportar un error" button. Comments. |
-| `/partidos/[slug]`, `/provincias/[slug]`                | Filtered lists (SEO-friendly landing pages).                                                                                                                                                                                                                                                                                                                                               |
-| `/metodologia`                                          | How profiles are researched (AI-assisted, human-reviewed), source rules, ranking method, corrections policy.                                                                                                                                                                                                                                                                               |
-| `/feedback`                                             | General feedback form; profile-level corrections prefill politician + section.                                                                                                                                                                                                                                                                                                             |
-| `/iniciar-sesion`, `/registro`, `/recuperar-contrasena` | Auth.                                                                                                                                                                                                                                                                                                                                                                                      |
-| `/privacidad`, `/terminos`                              | Legal pages (content from site settings).                                                                                                                                                                                                                                                                                                                                                  |
+| Route                                                   | Content                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                                                     | Ranked list: photo, full name, current party (badge), current role, province, rank change vs last week. Search bar + filters (party, current role, province). Paginated. "Relevancia en noticias, actualizado semanalmente" with link to methodology.                                                                                                                                                                                                          |
+| `/politicos/[slug]`                                     | Header (photo, name, party, current role). Sections: Resumen y trayectoria (timeline of positions with provinces), Partidos y alianzas, Gestión (work done in office), Leyes e iniciativas, Posturas (stances grouped by topic), Declaraciones e influencias, Controversias. Numbered source footnotes per claim; "Fuentes" list with publisher, date, original + archived link. "Última actualización" + revision note. "Reportar un error" button. Comments. |
+| `/partidos/[slug]`, `/provincias/[slug]`                | Filtered lists (SEO-friendly landing pages).                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `/metodologia`                                          | How profiles are researched (AI-assisted, human-reviewed), source rules, ranking method, corrections policy.                                                                                                                                                                                                                                                                                                                                                   |
+| `/feedback`                                             | General feedback form; profile-level corrections prefill politician + section.                                                                                                                                                                                                                                                                                                                                                                                 |
+| `/iniciar-sesion`, `/registro`, `/recuperar-contrasena` | Auth.                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `/privacidad`, `/terminos`                              | Legal pages (content from site settings).                                                                                                                                                                                                                                                                                                                                                                                                                      |
 
 ### 7.2 Search and filters
 

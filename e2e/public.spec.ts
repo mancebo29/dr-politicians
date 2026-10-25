@@ -123,7 +123,9 @@ test.describe("profile page", () => {
       "Resumen",
       "Trayectoria",
       "Partidos y alianzas",
+      "Gestión",
       "Leyes e iniciativas",
+      "Posturas",
       "Declaraciones e influencias",
       "Controversias",
       "Fuentes",
@@ -132,6 +134,10 @@ test.describe("profile page", () => {
       await expect(page.getByRole("heading", { level: 2, name: section })).toBeVisible();
     }
     await expect(page.getByTestId("current-roles")).toHaveText("Senador, Santiago");
+    await expect(page.getByRole("heading", { level: 3, name: "Educación" })).toBeVisible();
+    await expect(
+      page.getByText("Comisión de ejemplo sobre presupuestos municipales"),
+    ).toBeVisible();
     await expect(page.getByRole("link", { name: "PRM" }).first()).toHaveAttribute(
       "href",
       "/partidos/prm",

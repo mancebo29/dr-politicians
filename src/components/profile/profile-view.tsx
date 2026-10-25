@@ -9,11 +9,14 @@ import {
   positionOriginLabel,
   sourceTierLabel,
   statementKindLabel,
+  workRecordKindLabel,
+  workRecordStatusLabel,
 } from "@/lib/labels";
 import { formatPartialDate } from "@/lib/partial-date";
 import type { ResearchPayload } from "@/lib/research/schema";
 
 type Cite = (ids: string[]) => ReactNode;
+type Statement = ResearchPayload["statements"][number];
 
 export function periodLabel(start?: string | null, end?: string | null, isCurrent?: boolean) {
   const from = formatPartialDate(start) || "¿?";
@@ -27,6 +30,20 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
       <h2 className="border-b border-border pb-2 text-lg font-semibold">{title}</h2>
       <div className="mt-4">{children}</div>
     </section>
+  );
+}
+
+function Statement({ statement: c, cite }: { statement: Statement; cite: Cite }) {
+  return (
+    <>
+      {c.quote && (
+        <blockquote className="mt-1 border-l-2 border-border pl-3 italic">“{c.quote}”</blockquote>
+      )}
+      <p className="mt-1">
+        {c.context}
+        {cite(c.sourceIds)}
+      </p>
+    </>
   );
 }
 
@@ -64,6 +81,11 @@ export function ProfileView({
     </sup>
   );
   const p = payload.politician;
+  const stances = Map.groupBy(
+    payload.statements.filter((c) => c.kind === "position"),
+    (c) => c.topic,
+  );
+  const otherStatements = payload.statements.filter((c) => c.kind !== "position");
 
   return (
     <article>
@@ -155,6 +177,35 @@ export function ProfileView({
         )}
       </Section>
 
+      <Section title="Gestión">
+        {payload.workRecord.length ? (
+          <ul className="space-y-4">
+            {payload.workRecord.map((c, i) => (
+              <li key={i}>
+                <p className="font-medium">
+                  {c.title}
+                  {cite(c.sourceIds)}
+                </p>
+                <p className="text-sm text-muted">
+                  {[
+                    workRecordKindLabel[c.kind],
+                    c.topic,
+                    workRecordStatusLabel[c.status],
+                    (c.start || c.end) && periodLabel(c.start, c.end),
+                    c.office,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </p>
+                <p className="mt-1">{c.description}</p>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <Empty />
+        )}
+      </Section>
+
       <Section title="Leyes e iniciativas">
         {payload.legislation.length ? (
           <ul className="space-y-3">
@@ -178,24 +229,40 @@ export function ProfileView({
         )}
       </Section>
 
+      <Section title="Posturas">
+        {stances.size ? (
+          <div className="space-y-6">
+            {[...stances].map(([topic, items]) => (
+              <section key={topic}>
+                <h3 className="font-medium">{topic}</h3>
+                <ul className="mt-2 space-y-3">
+                  {items.map((c, i) => (
+                    <li key={i}>
+                      {c.saidOn && (
+                        <p className="text-sm text-muted">{formatPartialDate(c.saidOn)}</p>
+                      )}
+                      <Statement statement={c} cite={cite} />
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))}
+          </div>
+        ) : (
+          <Empty />
+        )}
+      </Section>
+
       <Section title="Declaraciones e influencias">
-        {payload.statements.length ? (
+        {otherStatements.length ? (
           <ul className="space-y-4">
-            {payload.statements.map((c, i) => (
+            {otherStatements.map((c, i) => (
               <li key={i}>
                 <p className="text-sm text-muted">
                   {statementKindLabel[c.kind]} · {c.topic}
                   {c.saidOn && ` · ${formatPartialDate(c.saidOn)}`}
                 </p>
-                {c.quote && (
-                  <blockquote className="mt-1 border-l-2 border-border pl-3 italic">
-                    “{c.quote}”
-                  </blockquote>
-                )}
-                <p className="mt-1">
-                  {c.context}
-                  {cite(c.sourceIds)}
-                </p>
+                <Statement statement={c} cite={cite} />
               </li>
             ))}
           </ul>
