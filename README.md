@@ -34,6 +34,7 @@ server log, or written as JSON files to `MAIL_OUTBOX_DIR` when it is set.
 | `pnpm e2e`                                           | Playwright end-to-end tests                                                                                         |
 | `pnpm db:generate`                                   | Generate a migration from schema changes in `src/db/schema`                                                         |
 | `pnpm db:migrate` / `pnpm db:seed`                   | Apply migrations / upsert reference data                                                                            |
+| `pnpm db:migrate:deploy`                             | Vercel build step: migrates `MIGRATION_DATABASE_URL` on production builds only, skips everywhere else               |
 | `pnpm db:studio`                                     | Drizzle Studio                                                                                                      |
 | `pnpm admin:promote <email-or-username>`             | Grant the admin role to an existing account                                                                         |
 | `pnpm db:up` / `pnpm db:down`                        | Start / stop local Postgres. Data is kept in the `pgdata` volume.                                                   |

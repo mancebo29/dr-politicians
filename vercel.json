@@ -1,4 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "pnpm db:migrate:deploy && pnpm build",
   "crons": [{ "path": "/api/cron/popularity", "schedule": "0 10 * * 1" }]
 }

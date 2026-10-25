@@ -18,6 +18,7 @@
     "db:reset": "docker compose down --volumes && docker compose up -d --wait",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx --env-file-if-exists=.env.local scripts/db-migrate.ts",
+    "db:migrate:deploy": "tsx scripts/db-migrate-deploy.ts",
     "db:seed": "tsx --env-file-if-exists=.env.local scripts/db-seed.ts",
     "db:seed:samples": "tsx --env-file-if-exists=.env.local scripts/seed-sample-profiles.ts",
     "db:studio": "drizzle-kit studio",
