@@ -18,7 +18,7 @@ import {
   type ResearchPayload,
   researchPayloadSchema,
 } from "./schema";
-import { nextWaveSegment, waveSegment, type WaveSegment } from "./waves";
+import { nextWaveSegment, waveSegment, type WaveSegment, waveSegments } from "./waves";
 
 export const LEASE_MS = 2 * 60 * 60 * 1000;
 
@@ -198,6 +198,39 @@ async function insertDiscoveryJob(
     after: job,
   });
   return job;
+}
+
+// What the runner does when the queue is empty: queue discovery for the first
+// segment that has never had a discovery job, unless a roster is still in
+// progress or awaiting review. Segments an admin rejected are not retried.
+export async function startNextDiscovery(db: Database) {
+  return db.transaction(async (tx) => {
+    // Two runners finding an empty queue at once must not both queue discovery.
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtext('roster_discovery'))`);
+    const [pending] = await tx
+      .select({ title: researchJobs.requestedName, status: researchJobs.status })
+      .from(researchJobs)
+      .where(
+        and(
+          eq(researchJobs.kind, "roster_discovery"),
+          inArray(researchJobs.status, [...openStatuses]),
+        ),
+      )
+      .limit(1);
+    if (pending) return { queued: null, pending };
+    const discovered = new Set(
+      (
+        await tx
+          .selectDistinct({ segment: researchJobs.rosterSegment })
+          .from(researchJobs)
+          .where(eq(researchJobs.kind, "roster_discovery"))
+      ).map((r) => r.segment),
+    );
+    const segment = waveSegments.find((s) => !discovered.has(s.key));
+    if (!segment) return { queued: null, pending: null };
+    const job = await insertDiscoveryJob(tx, segment, null);
+    return { queued: { id: job.id, title: segment.title }, pending: null };
+  });
 }
 
 export async function createDiscoveryJob(

@@ -37,6 +37,7 @@ function fakeQueue(outcomes: ("submit" | "fail")[], overrides: Partial<RunnerDep
       return { status: "failed" };
     },
     heartbeat: async () => null,
+    discoverNext: async () => ({ queued: null, pending: null }),
     shouldStop: () => false,
     now: () => clock,
     log: (line) => lines.push(line),
@@ -84,6 +85,22 @@ describe("runQueue", () => {
     await runQueue(deps, options);
     expect(released).toEqual([]);
     expect(lines.at(-1)).toContain("job is claimed");
+  });
+
+  it("queues the next discovery when the queue runs dry, and names a pending roster", async () => {
+    let discovered = false;
+    const { deps } = fakeQueue([], {
+      discoverNext: async () => {
+        if (discovered) return { queued: null, pending: { title: "Ola 1", status: "submitted" } };
+        discovered = true;
+        return { queued: { title: "Ola 1" }, pending: null };
+      },
+    });
+    // The fake queue stays empty, so the second claim finds the roster pending.
+    expect(await runQueue(deps, options)).toMatchObject({
+      processed: 0,
+      stopReason: "queue empty; Ola 1 is waiting for your approval",
+    });
   });
 
   it("stops before claiming when asked to", async () => {

@@ -154,6 +154,7 @@ async function main() {
   const summary = await runQueue(
     {
       claim: async () => (await claimAndSaveBrief())?.brief ?? null,
+      discoverNext: () => call("discover-next", {}),
       status: (jobId) => call("status", { jobId }),
       release: (jobId) => call("release", { jobId }),
       heartbeat: (jobId) => call("heartbeat", { jobId }),

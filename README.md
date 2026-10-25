@@ -63,8 +63,10 @@ so stop any running `pnpm dev` first (Next allows one dev server per project).
 Profiles are researched with Claude Code and published only after admin review
 (PLAN §6). The protocol lives in `.claude/skills/research-politician/SKILL.md`.
 
-1. An admin starts AI discovery for a wave segment in `/admin/investigacion`
-   (or queues people by name) and creates a research token in
+1. Waves start themselves: when the queue is empty, `pnpm research:run` queues
+   discovery for the next undiscovered wave segment. An admin can also start a
+   segment or queue people by name in `/admin/investigacion`, and creates a
+   research token in
    `/admin/investigacion/tokens` (or `pnpm research:token <name>` locally).
 2. Put the token in `.env.local` as `RESEARCH_TOKEN` (and `RESEARCH_API_URL` if
    the app isn't on `http://localhost:3000`), then run `pnpm research:run`

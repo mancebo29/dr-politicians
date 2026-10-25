@@ -13,6 +13,12 @@ export type SessionResult = {
 
 export type RunnerDeps = {
   claim: () => Promise<Brief | null>;
+  // Called when the queue is empty: queues the next wave segment's discovery,
+  // or reports the roster that is still in progress or awaiting review.
+  discoverNext: () => Promise<{
+    queued: { title: string | null } | null;
+    pending: { title: string | null; status: string } | null;
+  }>;
   status: (jobId: string) => Promise<{ status: string; heldByYou: boolean }>;
   release: (jobId: string) => Promise<{ status: string }>;
   heartbeat: (jobId: string) => Promise<unknown>;
@@ -57,7 +63,14 @@ export async function runQueue(deps: RunnerDeps, options: RunnerOptions): Promis
     }
     const brief = await deps.claim();
     if (!brief) {
-      summary.stopReason = "queue empty";
+      const { queued, pending } = await deps.discoverNext();
+      if (queued) {
+        deps.log(`Queue empty; queued discovery for ${queued.title}.`);
+        continue;
+      }
+      summary.stopReason = pending
+        ? `queue empty; ${pending.title} is ${pending.status === "submitted" ? "waiting for your approval" : pending.status}`
+        : "queue empty";
       break;
     }
 

@@ -7,6 +7,7 @@ import {
   positions,
   profileRevisions,
   researchJobs,
+  researchSubmissions,
   users,
 } from "@/db/schema";
 import { seedReferenceData } from "@/db/seed/reference";
@@ -23,6 +24,7 @@ import {
   jobStatus,
   MAX_ATTEMPTS,
   releaseJob,
+  startNextDiscovery,
   decideSubmission,
   heartbeat,
   LEASE_MS,
@@ -483,6 +485,33 @@ describe("roster discovery", () => {
     await expect(
       approveRoster(db, { submissionId, reviewerUserId: reviewerId, selected: [3] }),
     ).rejects.toThrow(/Selection/);
+  });
+
+  it("starts the first undiscovered segment only when no roster is in progress", async () => {
+    const first = await startNextDiscovery(db);
+    expect(first.queued?.title).toBe("Ola 1 · Figuras nacionales");
+    expect(await startNextDiscovery(db)).toEqual({
+      queued: null,
+      pending: { title: "Ola 1 · Figuras nacionales", status: "queued" },
+    });
+    const brief = await claimNextJob(db, tokenId);
+    await submitResearch(db, {
+      tokenId,
+      jobId: brief!.job.id,
+      payload: sampleRoster(),
+      checkSources: allOk,
+    });
+    expect((await startNextDiscovery(db)).pending?.status).toBe("submitted");
+
+    // A rejected segment is left alone; the next one starts.
+    const [submission] = await db.select().from(researchSubmissions);
+    await decideSubmission(db, {
+      submissionId: submission.id,
+      reviewerUserId: reviewerId,
+      decision: "rejected",
+      note: "Lista incorrecta",
+    });
+    expect((await startNextDiscovery(db)).queued?.title).toBe("Ola 2 · Senado y gabinete");
   });
 
   it("does not queue the next discovery twice", async () => {
