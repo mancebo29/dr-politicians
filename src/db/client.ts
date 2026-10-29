@@ -8,6 +8,10 @@ export type Transaction = Parameters<Parameters<Database["transaction"]>[0]>[0];
 export type Executor = Database | Transaction;
 
 export function createDb(url: string, options: { max?: number } = {}) {
-  const client = postgres(url, { max: options.max ?? 10, onnotice: () => {} });
+  // DATABASE_URL goes through Supabase's transaction pooler, which hands each
+  // transaction to an arbitrary backend, so named prepared statements cannot be
+  // reused. With them enabled, writes intermittently returned success but were
+  // never committed.
+  const client = postgres(url, { max: options.max ?? 10, prepare: false, onnotice: () => {} });
   return drizzle({ client, schema, casing: "snake_case" });
 }
