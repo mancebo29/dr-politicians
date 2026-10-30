@@ -1,7 +1,7 @@
 // Works the research queue unattended: claims each job, runs one fresh headless
 // Claude Code session for it, and releases jobs a session did not submit.
 // Nothing is published; every submission waits for admin review.
-//   pnpm research:run [--max-jobs 10] [--max-hours 8] [--timeout-min 100] [--model <id>]
+//   pnpm research:run [--max-jobs 5] [--max-hours 8] [--timeout-min 100] [--model <id>]
 // Ctrl-C stops after the current session ends; its job is released.
 import { spawn } from "node:child_process";
 import { createWriteStream } from "node:fs";
@@ -29,7 +29,7 @@ const ALLOWED_TOOLS = [
 
 const { values: args } = parseArgs({
   options: {
-    "max-jobs": { type: "string", default: "10" },
+    "max-jobs": { type: "string", default: "5" },
     "max-hours": { type: "string", default: "8" },
     "timeout-min": { type: "string", default: "100" },
     model: { type: "string" },
